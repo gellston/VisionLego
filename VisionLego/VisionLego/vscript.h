@@ -30,7 +30,6 @@ namespace vl {
 		std::vector<pointer_node> allNodes();
 
 		void checkNodeExist(std::string name, std::string type);
-		void 
 		void createNode(std::string name, std::string type);
 		void insertNode(pointer_node node);
 		void deleteNode(pointer_node node);

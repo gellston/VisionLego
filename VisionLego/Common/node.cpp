@@ -1,7 +1,7 @@
 #include "node.h"
 
 
-vl::node::node(std::string name, std::string type) {
+vl::node::node(std::string name, int type) {
 
 
 	this->_name = name;
@@ -36,7 +36,7 @@ void vl::node::name(std::string _name) {
 	this->_name = _name;
 }
 
-std::string vl::node::type() {
+int vl::node::type() {
 
 	return this->_type;
 }
