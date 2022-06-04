@@ -11,7 +11,7 @@ int main()
 
 
 
-	vl::node test("test", "test", 12123);
+	vl::node test("test", "test");
 
 
 
