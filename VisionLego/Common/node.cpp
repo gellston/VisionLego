@@ -154,6 +154,11 @@ void vl::node::check() {
 }
 
 
+void vl::node::registerNode(std::string name, int objectType, vl::searchType type) {
+
+}
+
+
 vl::pointer_node vl::node::searchNode(std::string name, vl::searchType type) {
 
 	if (this->_instance->_engine == nullptr) {

@@ -33,6 +33,8 @@ namespace vl {
 		std::unique_ptr<impl_node> _instance;
 
 	protected:
+
+		void registerNode(std::string name, int objectType,  vl::searchType type);
 		pointer_node searchNode(std::string name, vl::searchType type);
 		virtual void preprocess() = 0;
 		virtual void process() = 0;
