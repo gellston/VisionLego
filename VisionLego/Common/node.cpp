@@ -140,7 +140,7 @@ void vl::node::check() {
 			throw vl::exception(message);
 		}
 
-		if (isConst == false && this->_instance->_engine->exist(unique) == false) {
+		if (isConst == false && this->_instance->_engine->exist(unique, this->_instance->_depth) == false) {
 			std::string info = this->name();
 			info += ":";
 			info += param_name;
@@ -185,7 +185,7 @@ vl::pointer_node vl::node::searchNode(std::string name, vl::searchType type) {
 
 
 		try {
-			auto node = this->_instance->_engine->find(unique);
+			auto node = this->_instance->_engine->find(unique, this->_instance->_depth);
 			return std::dynamic_pointer_cast<vl::node>(node);
 
 		}

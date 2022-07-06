@@ -11,11 +11,13 @@ namespace vl {
 		std::unique_ptr<impl_numberNode> _instance;
 	public:
 
-		numberNode(std::string name, smrtengine engine;
+		numberNode(std::string name, smrtengine engine);
 		~numberNode() override;
 
 		void set(double data);
 		double get();
 
+		void preprocess() override;
+		void process() override;
 	};
 }

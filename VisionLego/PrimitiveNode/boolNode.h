@@ -17,5 +17,8 @@ namespace vl{
 		void set(bool data);
 		bool get();
 
+		void preprocess() override;
+		void process() override;
+
 	};
 }

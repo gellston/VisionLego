@@ -16,6 +16,10 @@ vl::boolNode::boolNode(std::string name, smrtengine engine) : vl::node(name, 1, 
 										   _instance(new impl_boolNode()) {
 
 	this->_instance->data = false;
+
+
+
+
 }
 
 vl::boolNode::~boolNode() {
@@ -27,4 +31,14 @@ void vl::boolNode::set(bool data) {
 }
 bool vl::boolNode::get() {
 	return this->_instance->data;
+}
+
+
+void vl::boolNode::preprocess() {
+
+}
+
+void vl::boolNode::process() {
+
+
 }

@@ -29,3 +29,15 @@ void vl::numberNode::set(double data) {
 double vl::numberNode::get() {
 	return this->_instance->data;
 }
+
+
+void vl::numberNode::preprocess() {
+
+}
+
+void vl::numberNode::process() {
+
+
+}
+
+
