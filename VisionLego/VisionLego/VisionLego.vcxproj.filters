@@ -26,5 +26,8 @@
     <ClInclude Include="vscript.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="vscript_export.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

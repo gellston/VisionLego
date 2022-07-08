@@ -19,6 +19,7 @@ namespace vl {
 
 		virtual ~iengine() {};
 		virtual pointer_inode find(unsigned long long key, int depth) = 0;
+		virtual pointer_inode create(std::string name, int objectType) = 0;
 		virtual bool exist(unsigned long long key, int depth) = 0;
 
 	};

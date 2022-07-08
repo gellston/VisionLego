@@ -1,7 +1,6 @@
 #include "node.h"
 
 #include "macro.h"
-#include "vlexception.h"
 
 namespace vl {
 
@@ -15,6 +14,7 @@ namespace vl {
 
 		bool _error;
 		std::string _message;
+		bool _isConst;
 
 		smrtengine _engine;
 
@@ -37,7 +37,7 @@ namespace vl {
 }
 
 
-vl::node::node(std::string name, int type, smrtengine engine) : _instance(new vl::impl_node()) {
+vl::node::node(std::string name, int type, bool isConst, smrtengine engine) : _instance(new vl::impl_node()) {
 
 	this->_instance->_name = name;
 	this->_instance->_type = type;
@@ -48,12 +48,12 @@ vl::node::node(std::string name, int type, smrtengine engine) : _instance(new vl
 
 	this->_instance->_engine = engine;
 
+	this->_instance->_isConst = isConst;
+
 	if (engine == nullptr) {
 		std::string message = generate_error_message(__FUNCTION__, __LINE__, "Null engine");
 		throw vl::exception(message);
 	}
-
-
 }
 
 vl::node::~node() {
@@ -105,6 +105,14 @@ std::string vl::node::message() {
 }
 
 
+bool vl::node::isConst() {
+	return this->_instance->_isConst;
+}
+
+void vl::node::setConst(bool isConst) {
+	this->_instance->_isConst = isConst;
+}
+
 void vl::node::check() {
 
 	
@@ -155,14 +163,40 @@ void vl::node::check() {
 
 
 void vl::node::registerNode(std::string name, int objectType, vl::searchType type) {
-
+	try {
+		
+		switch (type)
+		{
+		case vl::searchType::input: {
+			auto inode = this->_instance->_engine->create(name, objectType);
+			auto node = std::dynamic_pointer_cast<vl::node>(inode);
+			auto innode = std::make_tuple(objectType, node, true, (unsigned long long)non_uid);
+			this->_instance->_inputNode[name] = innode;
+			break;
+		}
+		case vl::searchType::output: {
+			auto inode = this->_instance->_engine->create(name, objectType);
+			auto node = std::dynamic_pointer_cast<vl::node>(inode);
+			auto outnode = std::make_tuple(objectType, node);
+			this->_instance->_outputNode[name] = outnode;
+			break;
+		}
+		default:
+			throw std::exception("Invalid search type");
+			break;
+		}
+	}
+	catch (std::exception e) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
+	}
 }
 
 
 vl::pointer_node vl::node::searchNode(std::string name, vl::searchType type) {
 
 	if (this->_instance->_engine == nullptr) {
-		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "invalid engine");
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Invalid engine");
 		throw vl::exception(message);
 	}
 
@@ -171,7 +205,7 @@ vl::pointer_node vl::node::searchNode(std::string name, vl::searchType type) {
 	{
 	case vl::searchType::input: {
 		if (this->_instance->_inputNode.find(name) == this->_instance->_inputNode.end()) {
-			std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "invalid node key");
+			std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Invalid node key");
 			throw vl::exception(message);
 		}
 
@@ -202,7 +236,7 @@ vl::pointer_node vl::node::searchNode(std::string name, vl::searchType type) {
 	}
 	case vl::searchType::output: {
 		if (this->_instance->_outputNode.find(name) == this->_instance->_outputNode.end()) {
-			std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "invalid node key");
+			std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Invalid node key");
 			throw vl::exception(message);
 		}
 
@@ -217,7 +251,7 @@ vl::pointer_node vl::node::searchNode(std::string name, vl::searchType type) {
 	}
 
 	default: {
-		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "invalid search type argument");
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Invalid search type argument");
 		throw vl::exception(message);
 	}
 		break;
