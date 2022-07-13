@@ -1,6 +1,8 @@
 #include "node.h"
 
 #include "macro.h"
+#include "iengine.h"
+
 
 namespace vl {
 
@@ -37,7 +39,7 @@ namespace vl {
 }
 
 
-vl::node::node(std::string name, int type, bool isConst, smrtengine engine) : _instance(new vl::impl_node()) {
+vl::node::node(std::string name, int type, bool isConst, std::shared_ptr<vl::ihandle> engine) : _instance(new vl::impl_node()) {
 
 	this->_instance->_name = name;
 	this->_instance->_type = type;
@@ -46,7 +48,8 @@ vl::node::node(std::string name, int type, bool isConst, smrtengine engine) : _i
 	this->_instance->_uid = 0;
 	this->_instance->_depth = 0;
 
-	this->_instance->_engine = engine;
+	
+	this->_instance->_engine = std::dynamic_pointer_cast<vl::iengine>(engine);
 
 	this->_instance->_isConst = isConst;
 

@@ -12,12 +12,13 @@ namespace vl {
 }
 
 
-vl::constNumberNode::constNumberNode(std::string name, smrtengine engine) : vl::node(name, (int)vl::objectType::VL_CONST_NUMBER, false, engine),
+vl::constNumberNode::constNumberNode(std::string name, poiner_ihandle engine) : vl::node(name, (int)vl::objectType::VL_CONST_NUMBER, false, engine),
 																		    _instance(new impl_constNumberNode()) {
 
 	this->_instance->data = false;
 	this->setConst(true);
 }
+
 
 vl::constNumberNode::~constNumberNode() {
 

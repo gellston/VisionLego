@@ -141,11 +141,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="addon.cpp" />
+    <ClCompile Include="argument.cpp" />
     <ClCompile Include="Common.cpp" />
     <ClCompile Include="node.cpp" />
+    <ClCompile Include="info.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="addon.h" />
+    <ClInclude Include="argument.h" />
+    <ClInclude Include="constructor.h" />
+    <ClInclude Include="iaddon.h" />
+    <ClInclude Include="iconstructor.h" />
+    <ClInclude Include="info.h" />
+    <ClInclude Include="binding.h" />
     <ClInclude Include="inode.h" />
+    <ClInclude Include="ihandle.h" />
     <ClInclude Include="macro.h" />
     <ClInclude Include="node.h" />
     <ClInclude Include="vlenum.h" />

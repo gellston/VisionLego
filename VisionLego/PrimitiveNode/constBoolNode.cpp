@@ -12,12 +12,13 @@ namespace vl {
 }
 
 
-vl::constBoolNode::constBoolNode(std::string name, smrtengine engine) : vl::node(name, (int)vl::objectType::VL_CONST_BOOL, false, engine),
-																	    _instance(new impl_constBoolNode()) {
+vl::constBoolNode::constBoolNode(std::string name, poiner_ihandle engine) : vl::node(name, (int)vl::objectType::VL_CONST_BOOL, false, engine),
+																				_instance(new impl_constBoolNode()) {
 
 	this->_instance->data = false;
 	this->setConst(true);
 }
+
 
 vl::constBoolNode::~constBoolNode() {
 

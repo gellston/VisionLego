@@ -5,15 +5,16 @@
 
 
 namespace vl {
-	class varNumberNode : vl::node {
+	class varNumberNode : public vl::node {
 	private:
 	public:
 
-		varNumberNode(std::string name, smrtengine engine);
+		varNumberNode(std::string name, poiner_ihandle engine);
 		~varNumberNode() override;
 
 		void init() override;
 		void preprocess() override;
 		void process() override;
+
 	};
 }

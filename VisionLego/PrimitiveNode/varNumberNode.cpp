@@ -3,7 +3,7 @@
 #include "macro.h"
 #include "constNumberNode.h"
 
-vl::varNumberNode::varNumberNode(std::string name, smrtengine engine) : vl::node(name, (int)vl::objectType::VL_CONST_NUMBER, false, engine){
+vl::varNumberNode::varNumberNode(std::string name, poiner_ihandle engine) : vl::node(name, (int)vl::objectType::VL_CONST_NUMBER, false, engine){
 
 	this->setConst(false);
 
@@ -11,6 +11,7 @@ vl::varNumberNode::varNumberNode(std::string name, smrtengine engine) : vl::node
 	this->registerNode("input", (int)vl::objectType::VL_CONST_NUMBER, vl::searchType::input);
 	this->registerNode("output", (int)vl::objectType::VL_CONST_NUMBER, vl::searchType::output);
 }
+
 
 vl::varNumberNode::~varNumberNode() {
 

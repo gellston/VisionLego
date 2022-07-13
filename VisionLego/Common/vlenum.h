@@ -17,6 +17,9 @@ namespace vl {
 
 
 		VL_VARIABLE = 4000,
+		VL_BOOL,
+		VL_NUMBER
+
 
 	};
 

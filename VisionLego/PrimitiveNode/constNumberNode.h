@@ -6,12 +6,12 @@
 
 namespace vl {
 	class impl_constNumberNode;
-	class constNumberNode : vl::node {
+	class constNumberNode : public vl::node {
 	private:
 		std::unique_ptr<impl_constNumberNode> _instance;
 	public:
 
-		constNumberNode(std::string name, smrtengine engine);
+		constNumberNode(std::string name, poiner_ihandle engine);
 		~constNumberNode() override;
 
 		void set(double data);
@@ -20,5 +20,6 @@ namespace vl {
 		void init() override;
 		void preprocess() override;
 		void process() override;
+
 	};
 }

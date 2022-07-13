@@ -10,7 +10,7 @@
 
 
 #include "vlenum.h"
-#include "iengine.h"
+#include "ihandle.h"
 #include "inode.h"
 #include "vlexception.h"
 
@@ -23,7 +23,7 @@ namespace vl {
 							    //type,상수 노드, 상수 노드 사용 유무,  uid
 	using input_node = std::tuple<int, pointer_node, bool, unsigned long long>;
 	using output_node = std::tuple<int, pointer_node>;
-	using smrtengine = std::shared_ptr<vl::iengine>;
+
 	using unique = unsigned long long;
 
 	class impl_node;
@@ -54,7 +54,7 @@ namespace vl {
 
 	public:
 
-		node(std::string name, int type, bool isConst, smrtengine engine);
+		node(std::string name, int type, bool isConst, std::shared_ptr<vl::ihandle> engine);
 		virtual ~node();
 
 		int type();

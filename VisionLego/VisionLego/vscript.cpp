@@ -9,9 +9,7 @@
 #include <macro.h>
 #include <Windows.h>
 
-
-
-#include <iostream>
+#include <iconstructor.h>
 
 namespace vl {
 	class impl_vscript {
@@ -20,7 +18,7 @@ namespace vl {
 		std::unordered_map<unsigned long long, pointer_node> _nodes_table;
 		std::unordered_map<std::string, HMODULE> _addon_handles;
 		std::string _libraryPath;
-
+		std::vector<std::shared_ptr<vl::iaddon>> _addons;
 
 		impl_vscript() {
 
@@ -58,20 +56,46 @@ void vl::vscript::setAddonPath(std::string path) {
 }
 
 void vl::vscript::loadLibrary() {
+
 	if (this->_instance->_addon_handles.size() > 0) {
 		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "library is already loaded.");
 		throw vl::exception(message);
 	}
 
-
 	for (const auto& entry : std::filesystem::directory_iterator(this->_instance->_libraryPath)) {
 		if (entry.path().extension().string() == ".dll") {
 			std::string filePath = entry.path().string();
 			std::string fileName = entry.path().filename().string();
-
+			bool check = false;
 			HMODULE module = LoadLibraryA(filePath.c_str());
 			if (module != nullptr) {
-				this->_instance->_addon_handles[fileName] = module;
+
+				try {
+
+	/*				auto vl_version = (const char* (*)())GetProcAddress(module, "vl_version");
+					auto vl_name = (const char* (*)())GetProcAddress(module, "vl_name");
+					auto vl_module = (bool (*)())GetProcAddress(module, "vl_module");
+					auto vl_init = (void (*)(vl::iengine*))GetProcAddress(module, "vl_module");
+
+					if (vl_version == nullptr || vl_name == nullptr || vl_module == nullptr || vl_init == nullptr) {
+						FreeLibrary(module);
+						continue;
+					}
+
+					if (vl_module() == false) {
+						FreeLibrary(module);
+						continue;
+					}
+
+
+				*/
+
+
+					this->_instance->_addon_handles[fileName] = module;
+				}
+				catch (std::exception e) {
+					FreeLibrary(module);
+				}
 			}
 		}
 	}
@@ -108,6 +132,10 @@ void vl::vscript::unloadLibrary() {
 		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
 		throw vl::exception(message);
 	}
+}
+
+std::vector<std::shared_ptr<vl::iaddon>> vl::vscript::addons() {
+
 }
 
 
@@ -147,4 +175,9 @@ void vl::vscript::addNode(std::string name, int objectType) {
 bool vl::vscript::exist(unsigned long long key, int depth) {
 
 	return false;
+}
+
+
+void vl::vscript::registerAddon(std::shared_ptr<vl::iaddon> addon) {
+	this->_instance->_addons.push_back(addon);
 }

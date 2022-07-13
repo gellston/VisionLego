@@ -6,12 +6,12 @@
 
 namespace vl{
 	class impl_constBoolNode;
-	class constBoolNode : vl::node {
+	class constBoolNode : public vl::node {
 	private:
 		std::unique_ptr<impl_constBoolNode> _instance;
 	public:
 
-		constBoolNode(std::string name, smrtengine engine);
+		constBoolNode(std::string name, poiner_ihandle engine);
 		~constBoolNode() override;
 
 		void set(bool data);

@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <iengine.h>
+#include <iaddon.h>
 #include <vlenum.h>
 
 
@@ -15,20 +16,22 @@ namespace vl {
 	class vscript;
 	using pointer_vscript = std::shared_ptr<vscript>;
 	class vscript : public vl::iengine {
-
 	private:
-
 		std::unique_ptr<impl_vscript> _instance;
-
-		
 	public:
 		VL_SCRIPT_EXPORT vscript();
 		VL_SCRIPT_EXPORT ~vscript() override;
 
-
+		/*
+		Procedure
+		setAddonPath -> loadLibrary() -> compile (check for every node) -> run 
+		*/
 		VL_SCRIPT_EXPORT void loadLibrary();
 		VL_SCRIPT_EXPORT void unloadLibrary();
 		VL_SCRIPT_EXPORT void setAddonPath(std::string path);
+		VL_SCRIPT_EXPORT std::vector<std::shared_ptr<vl::iaddon>> addons();
+
+
 		VL_SCRIPT_EXPORT void load(std::string context, vl::contextType type);
 		VL_SCRIPT_EXPORT void compile();
 		VL_SCRIPT_EXPORT void run();
@@ -36,9 +39,9 @@ namespace vl {
 		VL_SCRIPT_EXPORT pointer_inode find(unsigned long long key, int depth) override;
 		VL_SCRIPT_EXPORT pointer_inode create(std::string name, int objectType) override;
 		VL_SCRIPT_EXPORT bool exist(unsigned long long key, int depth) override;
+		VL_SCRIPT_EXPORT void registerAddon(std::shared_ptr<vl::iaddon> addon) override;
 		VL_SCRIPT_EXPORT void addNode(std::string name, int objectType);
 	};
-
 }
 
 #endif
