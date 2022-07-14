@@ -145,7 +145,7 @@
     <ClCompile Include="argument.cpp" />
     <ClCompile Include="Common.cpp" />
     <ClCompile Include="node.cpp" />
-    <ClCompile Include="info.cpp" />
+    <ClCompile Include="nodeInfo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addon.h" />
@@ -153,7 +153,7 @@
     <ClInclude Include="constructor.h" />
     <ClInclude Include="iaddon.h" />
     <ClInclude Include="iconstructor.h" />
-    <ClInclude Include="info.h" />
+    <ClInclude Include="nodeInfo.h" />
     <ClInclude Include="binding.h" />
     <ClInclude Include="inode.h" />
     <ClInclude Include="ihandle.h" />

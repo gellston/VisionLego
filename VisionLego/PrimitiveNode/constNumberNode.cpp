@@ -1,5 +1,8 @@
-#include "constNumberNode.h"
+#include <vlexception.h>
+#include <macro.h>
 
+
+#include "constNumberNode.h"
 
 namespace vl {
 	class impl_constNumberNode {
@@ -12,11 +15,18 @@ namespace vl {
 }
 
 
-vl::constNumberNode::constNumberNode(std::string name, poiner_ihandle engine) : vl::node(name, (int)vl::objectType::VL_CONST_NUMBER, false, engine),
+vl::constNumberNode::constNumberNode(std::string name, vl::ihandle* engine) : vl::node(name, (int)vl::objectType::VL_CONST_NUMBER, false, engine),
 																		    _instance(new impl_constNumberNode()) {
 
-	this->_instance->data = false;
-	this->setConst(true);
+	try {
+		this->_instance->data = false;
+		this->setConst(true);
+	}
+	catch (std::exception e) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
+	}
+
 }
 
 

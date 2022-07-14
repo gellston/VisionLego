@@ -7,6 +7,7 @@
 #include <initializer_list>
 
 #include "addon.h"
+#include "iengine.h"
 
 #ifndef VL_ADDON_BINDING
 #define VL_ADDON_EXPORT __declspec(dllimport)
@@ -16,7 +17,7 @@
 
 
 
-#define VL_ADDON_INIT(engine) extern "C" VL_ADDON_EXPORT void vl_init(vl::iengine * engine)
+#define VL_ADDON_INIT extern "C" VL_ADDON_EXPORT void vl_init
 
 
 #define VL_VERSION(version)\
@@ -36,6 +37,8 @@ extern "C" VL_ADDON_EXPORT bool vl_module() {\
 \
 	return true; \
 }\
+
+
 
 
 #endif

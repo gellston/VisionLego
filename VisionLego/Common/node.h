@@ -20,8 +20,8 @@ namespace vl {
 
 	using pointer_node = std::shared_ptr<node>;
 
-							    //type,상수 노드, 상수 노드 사용 유무,  uid
-	using input_node = std::tuple<int, pointer_node, bool, unsigned long long>;
+							    //type, 상수 노드, 상수 노드 사용 유무,  uid,  param 이름(output이름)
+	using input_node = std::tuple<int, pointer_node, bool, unsigned long long, std::string>;
 	using output_node = std::tuple<int, pointer_node>;
 
 	using unique = unsigned long long;
@@ -54,24 +54,35 @@ namespace vl {
 
 	public:
 
-		node(std::string name, int type, bool isConst, std::shared_ptr<vl::ihandle> engine);
+		node(std::string name, int type, bool isConst, vl::ihandle* engine);
 		virtual ~node();
 
-		int type();
-		std::string name();
-		unique uid();
-		unsigned int depth();
+		int type() override;
+		std::string name() override;
+		unique uid() override;
+		unsigned int depth() override;
+		bool isConst() override;
+		bool error() override;
+		std::string message() override;
+		void checkConnectivity() override;
 
-		bool isConst();
 
-		bool error();
-		std::string message();
+		//Find const node
+		std::shared_ptr<vl::inode> input(std::string key) override;
+		std::shared_ptr<vl::inode> output(std::string key) override;
+
+		//Get node information
+		std::vector<input_info> input() override;
+		std::vector<output_info> output() override;
+
+		void connect(std::string outkey, unsigned long long outUid, std::string inkey) override;
+
 
 		void name(std::string name);
 		void uid(unique value);
 		void depth(unsigned int depth);
 
-		void check();
+		
 	};
 
 }

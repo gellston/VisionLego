@@ -1,5 +1,8 @@
+#include <vlexception.h>
+#include <macro.h>
+
 #include "constBoolNode.h"
-#include "vlenum.h"
+
 
 namespace vl {
 	class impl_constBoolNode {
@@ -12,11 +15,17 @@ namespace vl {
 }
 
 
-vl::constBoolNode::constBoolNode(std::string name, poiner_ihandle engine) : vl::node(name, (int)vl::objectType::VL_CONST_BOOL, false, engine),
+vl::constBoolNode::constBoolNode(std::string name, vl::ihandle* engine) : vl::node(name, (int)vl::objectType::VL_CONST_BOOL, false, engine),
 																				_instance(new impl_constBoolNode()) {
+	try {
+		this->_instance->data = false;
+		this->setConst(true);
+	}
+	catch (std::exception e) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
+	}
 
-	this->_instance->data = false;
-	this->setConst(true);
 }
 
 

@@ -47,7 +47,7 @@ namespace vl {
 		template<typename T> void add(std::string key, T value){}
 		template<typename T> void add(const char* key, T value) {
 			try {
-
+				this->add<T>(std::string(key), value);
 			}
 			catch (vl::exception e) {
 				throw e;

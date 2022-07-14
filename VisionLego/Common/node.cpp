@@ -18,10 +18,14 @@ namespace vl {
 		std::string _message;
 		bool _isConst;
 
-		smrtengine _engine;
+		vl::iengine * _engine;
 
 		std::unordered_map<std::string, input_node> _inputNode;
 		std::unordered_map<std::string, output_node> _outputNode;
+
+
+		std::vector<vl::input_info> _inputInfo;
+		std::vector<vl::output_info> _outputInfo;
 
 		impl_node() {
 			_uid = 0;
@@ -30,6 +34,7 @@ namespace vl {
 			_type = 0;
 			_error = false;
 			_message = "";
+			_engine = nullptr;
 		}
 		~impl_node() {
 
@@ -39,18 +44,15 @@ namespace vl {
 }
 
 
-vl::node::node(std::string name, int type, bool isConst, std::shared_ptr<vl::ihandle> engine) : _instance(new vl::impl_node()) {
+vl::node::node(std::string name, int type, bool isConst, vl::ihandle * engine) : _instance(new vl::impl_node()) {
 
 	this->_instance->_name = name;
 	this->_instance->_type = type;
 
-
 	this->_instance->_uid = 0;
 	this->_instance->_depth = 0;
 
-	
-	this->_instance->_engine = std::dynamic_pointer_cast<vl::iengine>(engine);
-
+	this->_instance->_engine = (vl::iengine *) engine;
 	this->_instance->_isConst = isConst;
 
 	if (engine == nullptr) {
@@ -60,7 +62,10 @@ vl::node::node(std::string name, int type, bool isConst, std::shared_ptr<vl::iha
 }
 
 vl::node::~node() {
-
+	this->_instance->_inputInfo.clear();
+	this->_instance->_inputNode.clear();
+	this->_instance->_outputInfo.clear();
+	this->_instance->_outputNode.clear();
 
 }
 
@@ -116,7 +121,7 @@ void vl::node::setConst(bool isConst) {
 	this->_instance->_isConst = isConst;
 }
 
-void vl::node::check() {
+void vl::node::checkConnectivity() {
 
 	
 	for (auto & element : this->_instance->_inputNode)
@@ -151,7 +156,7 @@ void vl::node::check() {
 			throw vl::exception(message);
 		}
 
-		if (isConst == false && this->_instance->_engine->exist(unique, this->_instance->_depth) == false) {
+		if (isConst == false && this->_instance->_engine->checkDepth(unique, this->_instance->_depth) == false) {
 			std::string info = this->name();
 			info += ":";
 			info += param_name;
@@ -173,8 +178,9 @@ void vl::node::registerNode(std::string name, int objectType, vl::searchType typ
 		case vl::searchType::input: {
 			auto inode = this->_instance->_engine->create(name, objectType);
 			auto node = std::dynamic_pointer_cast<vl::node>(inode);
-			auto innode = std::make_tuple(objectType, node, true, (unsigned long long)non_uid);
+			auto innode = std::make_tuple(objectType, node, true, (unsigned long long)non_uid, "");
 			this->_instance->_inputNode[name] = innode;
+			this->_instance->_inputInfo.push_back({ name, objectType });
 			break;
 		}
 		case vl::searchType::output: {
@@ -182,6 +188,7 @@ void vl::node::registerNode(std::string name, int objectType, vl::searchType typ
 			auto node = std::dynamic_pointer_cast<vl::node>(inode);
 			auto outnode = std::make_tuple(objectType, node);
 			this->_instance->_outputNode[name] = outnode;
+			this->_instance->_outputInfo.push_back({ name, objectType });
 			break;
 		}
 		default:
@@ -221,13 +228,14 @@ vl::pointer_node vl::node::searchNode(std::string name, vl::searchType type) {
 		auto node = std::get<1>(inputInfo); //const node pointer
 		auto isConst = std::get<2>(inputInfo); //is const check
 		auto unique = std::get<3>(inputInfo); //unique id
+		auto outputKey = std::get<4>(inputInfo); //output key
 
 
 		if (isConst == true) return node;
 
 
 		try {
-			auto node = this->_instance->_engine->find(unique, this->_instance->_depth);
+			auto node = this->_instance->_engine->find(unique, outputKey, this->_instance->_depth);
 			return std::dynamic_pointer_cast<vl::node>(node);
 
 		}
@@ -258,5 +266,72 @@ vl::pointer_node vl::node::searchNode(std::string name, vl::searchType type) {
 		throw vl::exception(message);
 	}
 		break;
+	}
+}
+
+
+std::shared_ptr<vl::inode> vl::node::input(std::string key) {
+	if (this->_instance->_inputNode.find(key) == this->_instance->_inputNode.end()) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Invalid input key");
+		throw vl::exception(message);
+	}
+	auto node = std::get<1>(this->_instance->_inputNode[key]);
+	return node;
+}
+
+std::shared_ptr<vl::inode> vl::node::output(std::string key) {
+	if (this->_instance->_outputNode.find(key) == this->_instance->_outputNode.end()) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Invalid output key");
+		throw vl::exception(message);
+	}
+	auto node = std::get<1>(this->_instance->_outputNode[key]);
+	return node;
+}
+
+std::vector<vl::input_info> vl::node::input() {
+	return this->_instance->_inputInfo;
+}
+std::vector<vl::output_info> vl::node::output() {
+	return this->_instance->_outputInfo;
+}
+
+void vl::node::connect(std::string outkey, unsigned long long outUid, std::string inkey) {
+	try {
+
+		auto outNode = this->_instance->_engine->find(outUid);
+		auto outNodeOutput = outNode->output(outkey);
+
+		if (this->_instance->_inputNode.find(inkey) == this->_instance->_inputNode.end()) {
+			std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Invalid input key");
+			throw vl::exception(message);
+		}
+
+		auto inNode = this->_instance->_inputNode[inkey];
+
+		auto type = std::get<0>(inNode);
+		
+		if (type != outNodeOutput->type()) {
+			std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Invalid node connection type");
+			throw vl::exception(message);
+		}
+
+
+		if (outNode->depth() > this->_instance->_depth && this->_instance->_depth > 0) {
+			std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Invalid output depth");
+			throw vl::exception(message);
+		}
+
+		auto finalDepth = outNode->depth() + 1;
+
+		if (finalDepth > this->_instance->_depth)
+			this->_instance->_depth = finalDepth;
+		
+		std::get<2>(inNode) = false;  //상수 사용 해제
+		std::get<3>(inNode) = outUid;  //uid 설정
+		std::get<4>(inNode) = outkey;   //out node 이름 지정 
+
+	}
+	catch (vl::exception e) {
+		throw e;
 	}
 }

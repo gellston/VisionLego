@@ -18,6 +18,7 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConsoleCpp", "ConsoleCpp\ConsoleCpp.vcxproj", "{0135D165-8B83-404A-B220-434182B4D92E}"
 	ProjectSection(ProjectDependencies) = postProject
 		{1F012F12-7AF7-4E1F-A75E-2719547B2144} = {1F012F12-7AF7-4E1F-A75E-2719547B2144}
+		{91336866-9C01-4D33-93D0-6FF94BE76264} = {91336866-9C01-4D33-93D0-6FF94BE76264}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AddonPrimitiveNode", "AddonPrimitiveNode\AddonPrimitiveNode.vcxproj", "{91336866-9C01-4D33-93D0-6FF94BE76264}"

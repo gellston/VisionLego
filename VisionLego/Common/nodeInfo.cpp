@@ -1,4 +1,4 @@
-#include "info.h"
+#include "nodeInfo.h"
 
 #include "vlenum.h"
 
@@ -23,7 +23,7 @@ namespace vl {
 	};
 }
 
-vl::info::info(std::string name, pointer_argument arg) : _instance(new vl::impl_info()) {
+vl::nodeInfo::nodeInfo(std::string name, pointer_argument arg) : _instance(new vl::impl_info()) {
 
 
 	try {
@@ -37,19 +37,19 @@ vl::info::info(std::string name, pointer_argument arg) : _instance(new vl::impl_
 
 }
 
-vl::info::~info() {
+vl::nodeInfo::~nodeInfo() {
 
 }
 
-std::string vl::info::category() {
+std::string vl::nodeInfo::category() {
 	return this->_instance->category;
 }
 
-std::string vl::info::name() {
+std::string vl::nodeInfo::name() {
 	return this->_instance->name;
 }
 
-int vl::info::type() {
+int vl::nodeInfo::type() {
 
 	return this->_instance->type;
 }

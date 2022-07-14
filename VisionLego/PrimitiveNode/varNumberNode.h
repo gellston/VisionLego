@@ -9,7 +9,7 @@ namespace vl {
 	private:
 	public:
 
-		varNumberNode(std::string name, poiner_ihandle engine);
+		varNumberNode(std::string name, vl::ihandle* engine);
 		~varNumberNode() override;
 
 		void init() override;

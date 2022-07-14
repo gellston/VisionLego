@@ -9,7 +9,7 @@ namespace vl {
 	private:
 	public:
 
-		varBoolNode(std::string name, poiner_ihandle engine);
+		varBoolNode(std::string name, vl::ihandle* engine);
 		~varBoolNode() override;
 
 		void init() override;

@@ -9,7 +9,7 @@ namespace vl {
 	public:
 
 		std::unordered_map<int, std::shared_ptr<vl::iconstructor>> _table;
-		std::vector<vl::pointer_info> _information;
+		std::vector<vl::pointer_nodeInfo> _information;
 
 		impl_addon() {
 
@@ -32,8 +32,12 @@ vl::addon::~addon() {
 
 }
 
-bool vl::addon::exist(int key) {
-	return false;
+bool vl::addon::exist(int type) {
+
+	if (this->_instance->_table.find(type) == this->_instance->_table.end()) {
+		return false;
+	}
+	return true;
 }
 
 
@@ -54,7 +58,7 @@ std::shared_ptr<vl::iconstructor> vl::addon::find(int type) {
 	}
 }
 
-void vl::addon::reg(int type, std::shared_ptr<vl::iconstructor> _constructor) {
+void vl::addon::constructor(int type, pointer_iconstructor _constructor) {
 
 	if (this->_instance->_table.find(type) != this->_instance->_table.end()) {
 		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Type already exist in this addon");
@@ -64,7 +68,7 @@ void vl::addon::reg(int type, std::shared_ptr<vl::iconstructor> _constructor) {
 	this->_instance->_table[type] = _constructor;
 }
 
-void  vl::addon::reg(pointer_info info) {
+void  vl::addon::nodeInfo(pointer_nodeInfo info) {
 	this->_instance->_information.push_back(info);
 }
 
@@ -73,6 +77,6 @@ std::shared_ptr<vl::addon> vl::addon::createAddon() {
 	return _addon;
 }
 
-std::vector<vl::pointer_info> vl::addon::information() {
+std::vector<vl::pointer_nodeInfo> vl::addon::information() {
 	return this->_instance->_information;
 }

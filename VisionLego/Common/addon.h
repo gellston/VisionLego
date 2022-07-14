@@ -11,7 +11,7 @@
 #include "node.h"
 #include "iaddon.h"
 #include "constructor.h"
-#include "info.h"
+#include "nodeInfo.h"
 
 namespace vl {
 
@@ -22,8 +22,8 @@ namespace vl {
 		
 
 	protected:
-		void reg(int type, std::shared_ptr<vl::iconstructor> _constructor);
-		void reg(pointer_info info);
+		void constructor(int type, pointer_iconstructor _constructor);
+		void nodeInfo(pointer_nodeInfo info);
 
 	public:
 		addon();
@@ -31,19 +31,19 @@ namespace vl {
 
 		bool exist(int type) override;
 		std::shared_ptr<vl::iconstructor> find(int type) override;
-		std::vector<pointer_info> information() override;
+		std::vector<pointer_nodeInfo> information() override;
 
 		template<typename T> void add(int type, std::string category) {
 			try {
 				std::shared_ptr<vl::iconstructor> constructor(new vl::constructor<T>());
-				this->reg(type, constructor);
+				this->constructor(type, constructor);
 
 				pointer_argument arg(new vl::argument());
 				arg->add("category", category);
 				arg->add("type", type);
 
-				pointer_info info(new vl::info(typeid(T).name(), arg));
-				this->reg(info);
+				pointer_nodeInfo info(new vl::nodeInfo(typeid(T).name(), arg));
+				this->nodeInfo(info);
 			}
 			catch (vl::exception e) {
 				throw e;

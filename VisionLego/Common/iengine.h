@@ -9,19 +9,18 @@
 #include "ihandle.h"
 
 namespace vl {
-	using pointer_inode = std::shared_ptr<vl::inode>;
+
 	class iengine : public vl::ihandle {
 	public:
-
 		virtual ~iengine() {};
-		virtual pointer_inode find(unsigned long long key, int depth) = 0;
+		virtual pointer_inode find(unsigned long long uid, std::string key, unsigned int depth) = 0;
+		virtual pointer_inode find(unsigned long long uid) = 0;
 		virtual pointer_inode create(std::string name, int objectType) = 0;
-		virtual bool exist(unsigned long long key, int depth) = 0;
-		virtual void registerAddon(std::shared_ptr<vl::iaddon> addon) = 0;
-
+		virtual bool checkDepth(unsigned long long uid, unsigned int depth) = 0;
+		virtual void registerAddon(pointer_iaddon addon) = 0;
 	};
 
-	using smrtengine = std::shared_ptr<vl::iengine>;
+	using pointer_iengine = std::shared_ptr<vl::iengine>;
 }
 
 #endif

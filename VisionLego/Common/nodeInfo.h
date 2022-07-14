@@ -12,15 +12,15 @@
 namespace vl {
 
 	class impl_info;
-	class info {
+	class nodeInfo {
 
 	private:
 		std::unique_ptr<impl_info> _instance;
 
 	public:
 
-		info(std::string name, pointer_argument arg);
-		~info();
+		nodeInfo(std::string name, pointer_argument arg);
+		~nodeInfo();
 
 		std::string name();
 		std::string category();
@@ -29,7 +29,7 @@ namespace vl {
 
 	};
 
-	using pointer_info = std::shared_ptr<vl::info>;
+	using pointer_nodeInfo = std::shared_ptr<vl::nodeInfo>;
 }
 
 #endif

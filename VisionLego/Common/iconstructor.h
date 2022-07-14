@@ -15,13 +15,13 @@
 
 namespace vl {
 
-	class iconstructor {
+	class iconstructor : public vl::ihandle {
 	public:
-		virtual ~iconstructor() {  };
-
-		virtual std::shared_ptr<vl::inode> create(std::string name, poiner_ihandle engine) = 0;
-
+		virtual ~iconstructor() {};
+		virtual std::shared_ptr<vl::inode> create(std::string name, vl::ihandle* engine) = 0;
 	};
+
+	using pointer_iconstructor = std::shared_ptr<vl::iconstructor>;
 }
 
 #endif

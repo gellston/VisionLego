@@ -10,14 +10,10 @@ namespace vl {
 
 	template<typename T> struct constructor : public vl::iconstructor  {
 	public:
-		constructor() {
+		constructor() { }
+		virtual ~constructor() override { }
 
-		}
-		virtual ~constructor() override {
-
-		}
-
-		std::shared_ptr<vl::inode> create(std::string name, poiner_ihandle engine) override {
+		std::shared_ptr<vl::inode> create(std::string name, vl::ihandle * engine) override {
 			return std::shared_ptr<vl::inode>(new T(name, engine));
 		}
 	};

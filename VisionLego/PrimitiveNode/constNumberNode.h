@@ -11,7 +11,7 @@ namespace vl {
 		std::unique_ptr<impl_constNumberNode> _instance;
 	public:
 
-		constNumberNode(std::string name, poiner_ihandle engine);
+		constNumberNode(std::string name, vl::ihandle* engine);
 		~constNumberNode() override;
 
 		void set(double data);

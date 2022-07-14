@@ -38,5 +38,10 @@ namespace vl {
 
 }
 
+namespace vl {
+	inline int to_integer(vl::objectType type) {
+		return static_cast<int>(type);
+	}
+}
 
 #endif

@@ -8,16 +8,21 @@
 #include <constNumberNode.h>
 
 
+
 VL_MODULE
 VL_NAME("PrimitiveNode")
 VL_VERSION("1.0")
-VL_ADDON_INIT(engine){
-
-	auto _addon = vl::addon::createAddon();
-	_addon->add<vl::varBoolNode>((int)vl::objectType::VL_BOOL, "Primitive");
-	_addon->add<vl::varNumberNode>((int)vl::objectType::VL_NUMBER, "Primitive");
-	_addon->add<vl::constBoolNode>((int)vl::objectType::VL_CONST_BOOL, "Primitive");
-	_addon->add<vl::constNumberNode>((int)vl::objectType::VL_CONST_NUMBER, "Primitive");
-
-	engine->registerAddon(_addon);
+VL_ADDON_INIT(vl::iengine* engine)
+{
+	try {
+		auto _addon = vl::addon::createAddon();
+		_addon->add<vl::varBoolNode>(vl::to_integer(vl::objectType::VL_BOOL), "Basic");
+		_addon->add<vl::varNumberNode>(vl::to_integer(vl::objectType::VL_NUMBER), "Basic");
+		_addon->add<vl::constBoolNode>(vl::to_integer(vl::objectType::VL_CONST_BOOL), "Basic");
+		_addon->add<vl::constNumberNode>(vl::to_integer(vl::objectType::VL_CONST_NUMBER), "Basic");
+		engine->registerAddon(_addon);
+	}
+	catch (std::exception e) {
+		
+	}
 }

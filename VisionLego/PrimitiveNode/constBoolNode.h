@@ -11,7 +11,7 @@ namespace vl{
 		std::unique_ptr<impl_constBoolNode> _instance;
 	public:
 
-		constBoolNode(std::string name, poiner_ihandle engine);
+		constBoolNode(std::string name, vl::ihandle* engine);
 		~constBoolNode() override;
 
 		void set(bool data);
