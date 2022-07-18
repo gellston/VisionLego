@@ -16,9 +16,9 @@ namespace vl {
 
 
 vl::constBoolNode::constBoolNode(std::string name, vl::ihandle* engine) : vl::node(name, (int)vl::objectType::VL_CONST_BOOL, false, engine),
-																				_instance(new impl_constBoolNode()) {
+_data(new impl_constBoolNode()) {
 	try {
-		this->_instance->data = false;
+		this->_data->data = false;
 		this->setConst(true);
 	}
 	catch (std::exception e) {
@@ -34,11 +34,11 @@ vl::constBoolNode::~constBoolNode() {
 }
 
 void vl::constBoolNode::set(bool data) {
-	this->_instance->data = data;
+	this->_data->data = data;
 	
 }
 bool vl::constBoolNode::get() {
-	return this->_instance->data;
+	return this->_data->data;
 }
 
 void vl::constBoolNode::init() {

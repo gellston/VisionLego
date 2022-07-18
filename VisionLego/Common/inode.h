@@ -33,8 +33,13 @@ namespace vl {
 		
 		virtual std::vector<input_info> input() = 0;
 		virtual std::vector<output_info> output() = 0;
+		virtual std::vector<unsigned long long> inputUid() = 0;
+		virtual std::vector<unsigned long long> outputUid() = 0;
 
 		virtual void connect(std::string outkey, unsigned long long outUid, std::string inkey) = 0;
+		virtual void connect(std::shared_ptr<vl::inode> outNode, std::string outKey, std::string inkey) = 0;
+
+		virtual void disconnect(std::string inKey) = 0;
 
 	
 	};

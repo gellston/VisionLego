@@ -1,10 +1,16 @@
 #pragma once
 
 
+#ifndef VL_VAR_NUMBER_NODE
+#define VL_VAR_NUMBER_NODE
+
+
+
 #include <node.h>
 
 
 namespace vl {
+	class varNumberNode;
 	class varNumberNode : public vl::node {
 	private:
 	public:
@@ -18,3 +24,5 @@ namespace vl {
 
 	};
 }
+
+#endif

@@ -4,6 +4,10 @@
 #include "iengine.h"
 
 
+
+#include <stack>
+
+
 namespace vl {
 
 	class impl_node {
@@ -102,6 +106,8 @@ unsigned int vl::node::depth() {
 
 void vl::node::depth(unsigned int depth) {
 	this->_instance->_depth = depth;
+	if(this->_instance->_engine != nullptr)
+		this->_instance->_engine->depthUpdate(depth);
 }
 
 bool vl::node::error() {
@@ -122,6 +128,13 @@ void vl::node::setConst(bool isConst) {
 }
 
 void vl::node::checkConnectivity() {
+
+
+	if (this->_instance->_engine == nullptr) {
+		std::string message = generate_error_message(__FUNCTION__, __LINE__, "Null engine exception");
+		throw vl::exception(message);
+	}
+
 
 	
 	for (auto & element : this->_instance->_inputNode)
@@ -171,6 +184,13 @@ void vl::node::checkConnectivity() {
 
 
 void vl::node::registerNode(std::string name, int objectType, vl::searchType type) {
+
+	if (this->_instance->_engine == nullptr) {
+		std::string message = generate_error_message(__FUNCTION__, __LINE__, "Null engine exception");
+		throw vl::exception(message);
+	}
+
+
 	try {
 		
 		switch (type)
@@ -206,7 +226,7 @@ void vl::node::registerNode(std::string name, int objectType, vl::searchType typ
 vl::pointer_node vl::node::searchNode(std::string name, vl::searchType type) {
 
 	if (this->_instance->_engine == nullptr) {
-		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Invalid engine");
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Null engine exception");
 		throw vl::exception(message);
 	}
 
@@ -295,7 +315,30 @@ std::vector<vl::output_info> vl::node::output() {
 	return this->_instance->_outputInfo;
 }
 
+std::vector<unsigned long long> vl::node::inputUid() {
+	std::vector<unsigned long long> uids;
+	for (auto& pair : this->_instance->_inputNode) {
+		if (std::get<2>(pair.second) == false) {
+			uids.push_back(std::get<3>(pair.second));
+		}
+	}
+	return uids;
+}
+
+std::vector<unsigned long long> vl::node::outputUid() {
+	return this->_instance->_engine->searchInputUID(this->uid(), this->depth());
+}
+
 void vl::node::connect(std::string outkey, unsigned long long outUid, std::string inkey) {
+
+
+	if (this->_instance->_engine == nullptr) {
+		std::string message = generate_error_message(__FUNCTION__, __LINE__, "Null engine exception");
+		throw vl::exception(message);
+	}
+
+
+
 	try {
 
 		auto outNode = this->_instance->_engine->find(outUid);
@@ -306,7 +349,7 @@ void vl::node::connect(std::string outkey, unsigned long long outUid, std::strin
 			throw vl::exception(message);
 		}
 
-		auto inNode = this->_instance->_inputNode[inkey];
+		auto & inNode = this->_instance->_inputNode[inkey];
 
 		auto type = std::get<0>(inNode);
 		
@@ -316,15 +359,33 @@ void vl::node::connect(std::string outkey, unsigned long long outUid, std::strin
 		}
 
 
-		if (outNode->depth() > this->_instance->_depth && this->_instance->_depth > 0) {
-			std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Invalid output depth");
-			throw vl::exception(message);
+		//Back tracking 필요!! 젠장
+		//Back tracking 시작!! 
+		auto outputNodes = this->outputUid();
+		std::stack<unsigned long long>_node_stack;
+		for (auto& uid : outputNodes)
+			_node_stack.push(uid);
+		
+		while (_node_stack.empty() != true) {
+			auto _cyrrebtUid = _node_stack.top();
+			_node_stack.pop();
+
+			auto _currentOutNode = this->_instance->_engine->find(_cyrrebtUid);
+			auto _currentUid = _currentOutNode->outputUid();
+			if (outNode == _currentOutNode) {
+				std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Recursive node error");
+				throw vl::exception(message);
+			}
+
+			for (auto& _new_uid : _currentUid)
+				_node_stack.push(_new_uid);
 		}
+
 
 		auto finalDepth = outNode->depth() + 1;
 
-		if (finalDepth > this->_instance->_depth)
-			this->_instance->_depth = finalDepth;
+		if (finalDepth > this->depth())
+			this->depth(finalDepth);
 		
 		std::get<2>(inNode) = false;  //상수 사용 해제
 		std::get<3>(inNode) = outUid;  //uid 설정
@@ -334,4 +395,64 @@ void vl::node::connect(std::string outkey, unsigned long long outUid, std::strin
 	catch (vl::exception e) {
 		throw e;
 	}
+}
+
+void vl::node::connect(pointer_inode outNode, std::string outKey, std::string inkey) {
+	try {
+
+		this->connect(outKey, outNode->uid(), inkey);
+	}
+	catch (vl::exception e) {
+		throw e;
+	}
+}
+
+
+void vl::node::disconnect(std::string inKey) {
+
+	if (this->_instance->_engine == nullptr) {
+		std::string message = generate_error_message(__FUNCTION__, __LINE__, "Null engine exception");
+		throw vl::exception(message);
+	}
+
+	try {
+
+		if (this->_instance->_inputNode.find(inKey) == this->_instance->_inputNode.end()) {
+			std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Invalid input key");
+			throw vl::exception(message);
+		}
+
+
+		auto & inNode = this->_instance->_inputNode[inKey];
+
+
+		auto useConst = std::get<2>(inNode); //const use;
+		if (useConst == false) {
+			std::get<3>(inNode) = vl::non_uid;	//clear uid
+			std::get<2>(inNode) = true;			//const use on
+			std::get<4>(inNode) = "";
+		}
+
+		unsigned int deepDepth = 0;
+		for (auto& input : this->_instance->_inputNode) {
+			auto key = input.first;
+			auto uid = std::get<3>(input.second);
+			auto isConst = std::get<2>(input.second);
+
+			
+			if (isConst == false) {
+				auto inputNode = this->_instance->_engine->find(uid);
+
+				auto objectDepth = inputNode->depth();
+				if (objectDepth > deepDepth)
+					deepDepth = objectDepth;
+			}
+		}
+		deepDepth += 1;
+		this->depth(deepDepth);
+	}
+	catch (vl::exception e) {
+		throw e;
+	}
+
 }

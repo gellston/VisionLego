@@ -4,7 +4,7 @@
 #include "varNumberNode.h"
 #include "constNumberNode.h"
 
-vl::varNumberNode::varNumberNode(std::string name, vl::ihandle* engine) : vl::node(name, (int)vl::objectType::VL_CONST_NUMBER, false, engine){
+vl::varNumberNode::varNumberNode(std::string name, vl::ihandle* engine) : vl::node(name, (int)vl::objectType::VL_NUMBER, false, engine){
 
 	try {
 		this->setConst(false);

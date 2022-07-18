@@ -19,6 +19,7 @@ namespace vl {
 	class node;
 
 	using pointer_node = std::shared_ptr<node>;
+	using weak_pointer_node = std::weak_ptr<node>;
 
 							    //type, 상수 노드, 상수 노드 사용 유무,  uid,  param 이름(output이름)
 	using input_node = std::tuple<int, pointer_node, bool, unsigned long long, std::string>;
@@ -48,14 +49,18 @@ namespace vl {
 		}
 
 		void setConst(bool isConst);
-		virtual void init() = 0;
-		virtual void preprocess() = 0;
-		virtual void process() = 0;
+
 
 	public:
 
 		node(std::string name, int type, bool isConst, vl::ihandle* engine);
 		virtual ~node();
+
+
+		virtual void init() = 0;
+		virtual void preprocess() = 0;
+		virtual void process() = 0;
+
 
 		int type() override;
 		std::string name() override;
@@ -75,7 +80,15 @@ namespace vl {
 		std::vector<input_info> input() override;
 		std::vector<output_info> output() override;
 
+		//Get uids if its connected node
+		std::vector<unsigned long long> inputUid() override;
+		std::vector<unsigned long long> outputUid() override;
+		
+
 		void connect(std::string outkey, unsigned long long outUid, std::string inkey) override;
+		void connect(pointer_inode outNode, std::string outKey, std::string inkey) override;
+		void disconnect(std::string inKey) override;
+
 
 
 		void name(std::string name);

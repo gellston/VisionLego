@@ -10,6 +10,7 @@
 #include <iengine.h>
 #include <random>
 #include <iostream>
+#include <algorithm>
 
 namespace vl {
 
@@ -36,11 +37,13 @@ namespace vl {
 
 	private:
 		vl::impl_vscript * _instance;
+		unsigned int _depth;
 
 	public:
 
 		engine() {
 			_instance = nullptr;
+			this->_depth = 0;
 		}
 
 		~engine() {
@@ -97,6 +100,19 @@ namespace vl {
 				return false;
 		}
 
+		void depthUpdate(unsigned int depth) {
+			if (this->_depth < depth)
+				this->_depth = depth;
+		}
+
+		void clearDeepDepth() {
+			this->_depth = 0;
+		}
+
+		unsigned int deepDepth() {
+			return this->_depth;
+		}
+
 		vl::pointer_inode create(std::string name, int objectType) {
 			try {
 				for (auto addon : this->_instance->_addons) {
@@ -115,6 +131,24 @@ namespace vl {
 				std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
 				throw vl::exception(message);
 			}
+		}
+
+		std::vector<unsigned long long> searchInputUID(unsigned long long inputUid, unsigned int depth) {
+			std::vector<unsigned long long> uidResult;
+
+			for (auto & nodeInfo : this->_instance->_nodes_table) {
+				auto node = nodeInfo.second;
+
+				if (depth >= node->depth())
+					continue;
+
+				auto inputUidInfo = node->inputUid();
+
+				if (std::find(inputUidInfo.begin(), inputUidInfo.end(), inputUid) != inputUidInfo.end()) {
+					uidResult.push_back(node->uid());
+				}
+			}
+			return uidResult;
 		}
 	};
 }
@@ -204,6 +238,7 @@ void vl::vscript::unloadLibrary() {
 
 
 		this->_instance->_nodes_table.clear();
+		this->_engine->clearDeepDepth();
 		this->_instance->_addons.clear();
 
 
@@ -243,19 +278,61 @@ std::vector<vl::addon_info> vl::vscript::addonInfo() {
 }
 
 void vl::vscript::run() {
-	try {
 
+
+	bool errorDetected = false;
+	for (unsigned int depth = 1; depth <= this->_engine->deepDepth(); depth++) {
+		std::vector<vl::pointer_node> equal_vectors;
+		for (auto& pair : this->_instance->_nodes_table) {
+			if (depth == pair.second->depth()) {
+				equal_vectors.push_back(pair.second);
+			}
+		}
+
+		for (auto& object : equal_vectors) {
+			try {
+				object->process();
+			}
+			catch (vl::exception e) {
+				errorDetected = true;
+			}
+		}
 	}
-	catch (vl::exception e) {
 
+	if (errorDetected == true) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Vision script run failed.");
+		throw vl::exception(message);
 	}
 }
 
-void vl::vscript::compile() {
+void vl::vscript::verification() {
+	/// <summary>
+	/// Check Connectivity
+	/// </summary>
+	/// 
+	/// 
+	bool errorDetected = false;
+	for (auto& node : this->_instance->_nodes_table) {
+		try {
+			node.second->checkConnectivity();
+		}
+		catch (vl::exception e) {
+			errorDetected = true;
+		}
+	}
+
+	if (errorDetected == true) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Verification failed, error detected");
+		throw vl::exception(message);
+	}
 
 }
 
 void vl::vscript::load(std::string context, vl::contextType type) {
+
+}
+
+void  vl::vscript::initNodes() {
 
 }
 
@@ -290,6 +367,9 @@ vl::pointer_node vl::vscript::addNode(std::string name, int objectType) {
 				return convertedNode;
 			}
 		}
+
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Object tpye not exists");
+		throw vl::exception(message);
 	}
 	catch (std::exception e) {
 		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
@@ -301,6 +381,7 @@ vl::pointer_node vl::vscript::addNode(std::string name, int objectType) {
 
 void vl::vscript::clearNode() {
 	this->_instance->_nodes_table.clear();
+	this->_engine->clearDeepDepth();
 }
 
 
@@ -313,6 +394,8 @@ void vl::vscript::connect(pointer_inode outNode, std::string outKey, pointer_ino
 	
 	try {
 		inNode->connect(outKey, outNode->uid(), inKey);
+		//need dpeth aligh after node connection
+		this->depthAlign();
 	}
 	catch (vl::exception e) {
 		throw e;
@@ -326,6 +409,34 @@ void vl::vscript::connect(unsigned long long outUid, std::string outKey, unsigne
 		auto inNode = this->_engine->find(inUid);
 
 		this->connect(outNode, outKey, inNode, inKey);
+
+
+	}
+	catch (vl::exception e) {
+		throw e;
+	}
+}
+
+
+void vl::vscript::disconnect(pointer_inode inNode, std::string inKey) {
+	try {
+		this->disconnect(inNode->uid(), inKey);
+	}
+	catch (vl::exception e) {
+		throw e;
+	}
+}
+
+void vl::vscript::disconnect(unsigned long long inUid, std::string inKey) {
+	try {
+		auto inNode = this->_engine->find(inUid);
+
+		
+		inNode->disconnect(inKey);
+
+		//need dpeth aligh after node disconnection
+		this->depthAlign();
+		
 	}
 	catch (vl::exception e) {
 		throw e;
@@ -339,6 +450,40 @@ vl::pointer_inode vl::vscript::findNode(unsigned long long uid) {
 	}
 
 	return this->_instance->_nodes_table[uid];
+}
+
+
+void vl::vscript::depthAlign() {
+	//Depth align process start!
+	for (unsigned int depth = 1; depth <= this->_engine->deepDepth(); depth++) {
+		std::vector<vl::pointer_node> equal_vectors;
+		for (auto& pair : this->_instance->_nodes_table) {
+			if (depth == pair.second->depth()) {
+				equal_vectors.push_back(pair.second);
+			}
+		}
+
+
+		for (auto& object : equal_vectors) {
+
+			//current Depth
+			unsigned int currentDepth = 0;
+
+			//Input Depth Collection and check Depth 
+			auto uidGroup = object->inputUid();
+			for (auto& uid : uidGroup) {
+
+				
+				auto inputNodeUID = this->_instance->_nodes_table[uid]->depth();
+
+				if (inputNodeUID > currentDepth)
+					currentDepth = inputNodeUID;
+			}
+
+			currentDepth++; //current Node depth increase for depth align;
+			object->depth(currentDepth);
+		}
+	}
 }
 
 void vl::vscript::printNodeInfo() {

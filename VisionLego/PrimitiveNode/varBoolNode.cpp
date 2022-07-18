@@ -1,5 +1,7 @@
 #include <vlexception.h>
 #include <macro.h>
+#include <iostream>
+#include <thread>
 
 #include "varBoolNode.h"
 #include "constBoolNode.h"
@@ -26,11 +28,30 @@ vl::varBoolNode::~varBoolNode() {
 }
 
 void vl::varBoolNode::init() {
+	try {
+		auto input = this->searchNode<vl::constBoolNode>("input", vl::searchType::input);
+		auto output = this->searchNode<vl::constBoolNode>("output", vl::searchType::output);
 
+		input->set(0);
+		output->set(0);
+	}
+	catch (std::exception e) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
+	}
 }
 
 void vl::varBoolNode::preprocess() {
+	try {
+		
+		//용도를 생각중.. 무슨 용도로 쓰면좋을가나
 
+		
+	}
+	catch (std::exception e) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
+	}
 }
 
 void vl::varBoolNode::process() {

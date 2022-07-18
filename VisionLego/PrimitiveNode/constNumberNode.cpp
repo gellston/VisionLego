@@ -16,10 +16,10 @@ namespace vl {
 
 
 vl::constNumberNode::constNumberNode(std::string name, vl::ihandle* engine) : vl::node(name, (int)vl::objectType::VL_CONST_NUMBER, false, engine),
-																		    _instance(new impl_constNumberNode()) {
+_data(new impl_constNumberNode()) {
 
 	try {
-		this->_instance->data = false;
+		this->_data->data = false;
 		this->setConst(true);
 	}
 	catch (std::exception e) {
@@ -35,10 +35,10 @@ vl::constNumberNode::~constNumberNode() {
 }
 
 void vl::constNumberNode::set(double data) {
-	this->_instance->data = data;
+	this->_data->data = data;
 }
 double vl::constNumberNode::get() {
-	return this->_instance->data;
+	return this->_data->data;
 }
 
 void vl::constNumberNode::init() {

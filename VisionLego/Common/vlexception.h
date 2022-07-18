@@ -10,11 +10,12 @@ namespace vl {
 
 	class exception : public std::runtime_error {
 	public:
-		exception() : std::runtime_error("") {}
 		exception(const std::string& message = "") : std::runtime_error(message) {}
 	};
 
-
+	class recursivGraphException : vl::exception {
+		recursivGraphException(const std::string& message = "") : vl::exception(message) {}
+	};
 
 }
 
