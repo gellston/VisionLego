@@ -17,6 +17,7 @@ namespace vl {
 		full_context += std::to_string(line);
 		full_context += ":";
 		full_context += "\n";
+		full_context += "\t";
 		full_context += _context;
 		full_context += "\n";
 		full_context += "==========================\n";

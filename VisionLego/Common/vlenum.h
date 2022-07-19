@@ -11,7 +11,9 @@ namespace vl {
 	};
 
 	enum class objectType {
+
 		VL_CONST = 0,
+		VL_CONST_FLOW,
 		VL_CONST_BOOL,
 		VL_CONST_NUMBER,
 

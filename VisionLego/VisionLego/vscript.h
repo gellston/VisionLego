@@ -42,7 +42,6 @@ namespace vl {
 		*/
 		VL_SCRIPT_EXPORT vl::pointer_node addNode(std::string name, int objectType);
 		VL_SCRIPT_EXPORT pointer_inode findNode(unsigned long long uid);
-		VL_SCRIPT_EXPORT void depthAlign();
 		VL_SCRIPT_EXPORT void disconnect(pointer_inode inNode, std::string inKey);
 		VL_SCRIPT_EXPORT void disconnect(unsigned long long inUid, std::string inKey);
 		VL_SCRIPT_EXPORT void connect(pointer_inode outNode, std::string outKey, pointer_inode inNode, std::string inKey);

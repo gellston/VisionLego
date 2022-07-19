@@ -8,8 +8,13 @@ vl::varNumberNode::varNumberNode(std::string name, vl::ihandle* engine) : vl::no
 
 	try {
 		this->setConst(false);
-		this->registerNode("input", (int)vl::objectType::VL_CONST_NUMBER, vl::searchType::input);
-		this->registerNode("output", (int)vl::objectType::VL_CONST_NUMBER, vl::searchType::output);
+
+		this->registerNode("flowIn", vl::to_integer(vl::objectType::VL_CONST_FLOW), vl::searchType::input);
+		this->registerNode("input", vl::to_integer(vl::objectType::VL_CONST_NUMBER), vl::searchType::input);
+
+
+		this->registerNode("flowOut", vl::to_integer(vl::objectType::VL_CONST_FLOW), vl::searchType::output);
+		this->registerNode("output", vl::to_integer(vl::objectType::VL_CONST_NUMBER), vl::searchType::output);
 	}
 	catch (std::exception e) {
 		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
@@ -23,7 +28,19 @@ vl::varNumberNode::~varNumberNode() {
 }
 
 void vl::varNumberNode::init() {
+	try {
 
+		//노드 초기화 시에 호출됨!!
+		auto input = this->searchNode<vl::constNumberNode>("input", vl::searchType::input);
+		auto output = this->searchNode<vl::constNumberNode>("output", vl::searchType::output);
+
+		input->set(0);
+		output->set(0);
+	}
+	catch (std::exception e) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
+	}
 }
 
 void vl::varNumberNode::preprocess() {

@@ -13,8 +13,11 @@ vl::varBoolNode::varBoolNode(std::string name, vl::ihandle* engine) : vl::node(n
 
 	try {
 		this->setConst(false);
-		this->registerNode("input", (int)vl::objectType::VL_CONST_BOOL, vl::searchType::input);
-		this->registerNode("output", (int)vl::objectType::VL_CONST_BOOL, vl::searchType::output);
+		this->registerNode("flowIn", vl::to_integer(vl::objectType::VL_CONST_FLOW), vl::searchType::input);
+		this->registerNode("input", vl::to_integer(vl::objectType::VL_CONST_BOOL), vl::searchType::input);
+
+		this->registerNode("flowOut", vl::to_integer(vl::objectType::VL_CONST_FLOW), vl::searchType::output);
+		this->registerNode("output", vl::to_integer(vl::objectType::VL_CONST_BOOL), vl::searchType::output);
 	}
 	catch (std::exception e) {
 		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
@@ -29,11 +32,13 @@ vl::varBoolNode::~varBoolNode() {
 
 void vl::varBoolNode::init() {
 	try {
+
+		//노드 초기화 시에 호출됨!!
 		auto input = this->searchNode<vl::constBoolNode>("input", vl::searchType::input);
 		auto output = this->searchNode<vl::constBoolNode>("output", vl::searchType::output);
 
-		input->set(0);
-		output->set(0);
+		input->set(false);
+		output->set(false);
 	}
 	catch (std::exception e) {
 		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
@@ -62,6 +67,8 @@ void vl::varBoolNode::process() {
 
 		bool value = input->get();
 		output->set(value);
+
+		//std::cout << "uid = " << this->uid() << std::endl;
 
 	}
 	catch (std::exception e) {

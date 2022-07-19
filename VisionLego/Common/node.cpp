@@ -4,7 +4,6 @@
 #include "iengine.h"
 
 
-
 #include <stack>
 
 
@@ -63,6 +62,7 @@ vl::node::node(std::string name, int type, bool isConst, vl::ihandle * engine) :
 		std::string message = generate_error_message(__FUNCTION__, __LINE__, "Null engine");
 		throw vl::exception(message);
 	}
+
 }
 
 vl::node::~node() {
@@ -221,6 +221,8 @@ void vl::node::registerNode(std::string name, int objectType, vl::searchType typ
 		throw vl::exception(message);
 	}
 }
+
+
 
 
 vl::pointer_node vl::node::searchNode(std::string name, vl::searchType type) {
@@ -395,6 +397,10 @@ void vl::node::connect(std::string outkey, unsigned long long outUid, std::strin
 	catch (vl::exception e) {
 		throw e;
 	}
+
+	this->_instance->_engine->depthAlign();
+	this->_instance->_engine->depthSorting();
+
 }
 
 void vl::node::connect(pointer_inode outNode, std::string outKey, std::string inkey) {
@@ -455,4 +461,6 @@ void vl::node::disconnect(std::string inKey) {
 		throw e;
 	}
 
+	this->_instance->_engine->depthAlign();
+	this->_instance->_engine->depthSorting();
 }

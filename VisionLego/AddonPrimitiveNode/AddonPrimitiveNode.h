@@ -6,6 +6,7 @@
 #include <varNumberNode.h>
 #include <constBoolNode.h>
 #include <constNumberNode.h>
+#include <constFlowNode.h>
 
 
 
@@ -20,6 +21,7 @@ VL_ADDON_INIT(vl::iengine* engine)
 		_addon->add<vl::varNumberNode>(vl::to_integer(vl::objectType::VL_NUMBER), "Basic");
 		_addon->add<vl::constBoolNode>(vl::to_integer(vl::objectType::VL_CONST_BOOL), "Basic");
 		_addon->add<vl::constNumberNode>(vl::to_integer(vl::objectType::VL_CONST_NUMBER), "Basic");
+		_addon->add<vl::constFlowNode>(vl::to_integer(vl::objectType::VL_CONST_FLOW), "Basic");
 		engine->registerAddon(_addon);
 	}
 	catch (std::exception e) {
