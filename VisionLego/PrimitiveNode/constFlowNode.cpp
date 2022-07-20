@@ -10,7 +10,7 @@
 
 
 
-vl::constFlowNode::constFlowNode(std::string name, vl::ihandle* engine) : vl::node(name, (int)vl::objectType::VL_CONST_FLOW, false, engine)
+vl::constFlowNode::constFlowNode(std::string name, vl::ihandle* engine) : vl::node(name, vl::to_integer(vl::objectType::VL_CONST_FLOW), false, engine)
 {
 	try {
 		this->setConst(true);

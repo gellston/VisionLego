@@ -20,9 +20,14 @@ namespace vl {
 
 		VL_VARIABLE = 4000,
 		VL_BOOL,
-		VL_NUMBER
+		VL_NUMBER,
 
 
+		VL_CONDITION = 8000,
+		VL_IF,
+
+
+		VL_FUNCTION = 12000,
 	};
 
 	enum class contextType {

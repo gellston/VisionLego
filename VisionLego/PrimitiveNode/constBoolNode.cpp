@@ -15,7 +15,7 @@ namespace vl {
 }
 
 
-vl::constBoolNode::constBoolNode(std::string name, vl::ihandle* engine) : vl::node(name, (int)vl::objectType::VL_CONST_BOOL, false, engine),
+vl::constBoolNode::constBoolNode(std::string name, vl::ihandle* engine) : vl::node(name, vl::to_integer(vl::objectType::VL_CONST_BOOL), false, engine),
 _data(new impl_constBoolNode()) {
 	try {
 		this->_data->data = false;

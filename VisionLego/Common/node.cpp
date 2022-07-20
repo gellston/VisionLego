@@ -20,6 +20,7 @@ namespace vl {
 		bool _error;
 		std::string _message;
 		bool _isConst;
+		bool _inCondition;
 
 		vl::iengine * _engine;
 
@@ -30,6 +31,9 @@ namespace vl {
 		std::vector<vl::input_info> _inputInfo;
 		std::vector<vl::output_info> _outputInfo;
 
+
+		std::unordered_map<std::string, std::vector<pointer_inode>> _conditional_node_map;
+
 		impl_node() {
 			_uid = 0;
 			_depth = 0;
@@ -38,6 +42,7 @@ namespace vl {
 			_error = false;
 			_message = "";
 			_engine = nullptr;
+			_inCondition = false;
 		}
 		~impl_node() {
 
@@ -118,6 +123,13 @@ std::string vl::node::message() {
 	return this->_instance->_message;
 }
 
+bool vl::node::inCondition() {
+	return this->_instance->_inCondition;
+}
+
+void vl::node::setCondition(bool check) {
+	this->_instance->_inCondition = check;
+}
 
 bool vl::node::isConst() {
 	return this->_instance->_isConst;
@@ -463,4 +475,113 @@ void vl::node::disconnect(std::string inKey) {
 
 	this->_instance->_engine->depthAlign();
 	this->_instance->_engine->depthSorting();
+}
+
+
+void vl::node::addInCondition(std::string name, unsigned long long uid) {
+
+
+	try {
+
+		auto node = this->_instance->_engine->find(uid);
+
+		if (node->uid() == this->uid()) {
+			std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Can't add node recursively");
+			throw vl::exception(message);
+		}
+
+		if (node->depth() < this->depth()) {
+			std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Invalid node depth");
+			throw vl::exception(message);
+		}
+
+
+		for (auto& condition_map : this->_instance->_conditional_node_map) {
+			auto& condition_vector = condition_map.second;
+
+			if (std::find(condition_vector.begin(), condition_vector.end(), node) != condition_vector.end()) {
+				std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Exist node in condition map");
+				throw vl::exception(message);
+			}
+		}
+
+		if (this->_instance->_conditional_node_map.find(name) == this->_instance->_conditional_node_map.end()) {
+			std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Can't find condition map name");
+			throw vl::exception(message);
+		}
+
+
+
+		//Back tracking 필요!! 젠장
+		//Back tracking 시작!! 
+		auto outputNodes = node->outputUid();
+		std::stack<unsigned long long>_node_stack;
+		for (auto& uid : outputNodes)
+			_node_stack.push(uid);
+
+		while (_node_stack.empty() != true) {
+			auto _currentUID = _node_stack.top();
+			_node_stack.pop();
+
+			auto _currentOutNode = this->_instance->_engine->find(_currentUID);
+			auto _currentUid = _currentOutNode->outputUid();
+			if (this == _currentOutNode.get()) {
+				std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Recursive node error");
+				throw vl::exception(message);
+			}
+
+			for (auto& _new_uid : _currentUid)
+				_node_stack.push(_new_uid);
+		}
+
+
+
+		node->connect("condition", this->uid(), "condition");
+		node->setCondition(true);
+
+		//auto outputNodes = node->outputUid();
+		//std::stack<unsigned long long>_node_stack;
+		//for (auto& uid : outputNodes)
+		//	_node_stack.push(uid);
+
+		//while (_node_stack.empty() != true) {
+		//	auto _currentUID = _node_stack.top();
+		//	_node_stack.pop();
+
+		//	auto _currentOutNode = this->_instance->_engine->find(_currentUID);
+		//	auto _currentUid = _currentOutNode->outputUid();
+		//	if (this == _currentOutNode.get()) {
+		//		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Recursive node error");
+		//		throw vl::exception(message);
+		//	}
+
+		//	for (auto& _new_uid : _currentUid)
+		//		_node_stack.push(_new_uid);
+		//}
+
+
+		//여기서 부터코딩
+		this->_instance->_conditional_node_map[name].push_back(node);
+
+	}
+	catch (vl::exception e) {
+		throw e;
+	}
+
+
+
+
+	this->_instance->_engine->depthAlign();
+	this->_instance->_engine->depthSorting();
+}
+
+
+void vl::node::addInCondition(std::string name, pointer_inode node) {
+	try {
+
+		this->addInCondition(name, node->uid());
+	}
+	catch (vl::exception e) {
+		throw e;
+	}
 }

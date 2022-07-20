@@ -67,6 +67,8 @@ namespace vl {
 		unique uid() override;
 		unsigned int depth() override;
 		bool isConst() override;
+		bool inCondition() override;
+		void setCondition(bool check) override;
 		bool error() override;
 		std::string message() override;
 		void checkConnectivity() override;
@@ -88,6 +90,8 @@ namespace vl {
 		void connect(std::string outkey, unsigned long long outUid, std::string inkey) override;
 		void connect(pointer_inode outNode, std::string outKey, std::string inkey) override;
 		void disconnect(std::string inKey) override;
+		void addInCondition(std::string name, unsigned long long uid) override;
+		void addInCondition(std::string name, pointer_inode node) override;
 
 
 

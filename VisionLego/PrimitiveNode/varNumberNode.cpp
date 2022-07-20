@@ -4,16 +4,16 @@
 #include "varNumberNode.h"
 #include "constNumberNode.h"
 
-vl::varNumberNode::varNumberNode(std::string name, vl::ihandle* engine) : vl::node(name, (int)vl::objectType::VL_NUMBER, false, engine){
+vl::varNumberNode::varNumberNode(std::string name, vl::ihandle* engine) : vl::node(name, vl::to_integer(vl::objectType::VL_NUMBER), false, engine){
 
 	try {
 		this->setConst(false);
 
-		this->registerNode("flowIn", vl::to_integer(vl::objectType::VL_CONST_FLOW), vl::searchType::input);
+		this->registerNode("condition", vl::to_integer(vl::objectType::VL_CONST_FLOW), vl::searchType::input);
 		this->registerNode("input", vl::to_integer(vl::objectType::VL_CONST_NUMBER), vl::searchType::input);
 
 
-		this->registerNode("flowOut", vl::to_integer(vl::objectType::VL_CONST_FLOW), vl::searchType::output);
+		this->registerNode("condition", vl::to_integer(vl::objectType::VL_CONST_FLOW), vl::searchType::output);
 		this->registerNode("output", vl::to_integer(vl::objectType::VL_CONST_NUMBER), vl::searchType::output);
 	}
 	catch (std::exception e) {

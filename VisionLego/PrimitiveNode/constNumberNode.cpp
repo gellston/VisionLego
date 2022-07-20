@@ -15,7 +15,7 @@ namespace vl {
 }
 
 
-vl::constNumberNode::constNumberNode(std::string name, vl::ihandle* engine) : vl::node(name, (int)vl::objectType::VL_CONST_NUMBER, false, engine),
+vl::constNumberNode::constNumberNode(std::string name, vl::ihandle* engine) : vl::node(name, vl::to_integer(vl::objectType::VL_CONST_NUMBER), false, engine),
 _data(new impl_constNumberNode()) {
 
 	try {

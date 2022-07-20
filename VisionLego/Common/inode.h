@@ -22,6 +22,8 @@ namespace vl {
 		virtual bool error() = 0;
 		virtual std::string message() = 0;
 		virtual bool isConst() = 0;
+		virtual bool inCondition() = 0;
+		virtual void setCondition(bool check) = 0 ;
 		virtual void checkConnectivity() = 0;
 
 		virtual void name(std::string name) = 0;
@@ -38,8 +40,10 @@ namespace vl {
 
 		virtual void connect(std::string outkey, unsigned long long outUid, std::string inkey) = 0;
 		virtual void connect(std::shared_ptr<vl::inode> outNode, std::string outKey, std::string inkey) = 0;
-
 		virtual void disconnect(std::string inKey) = 0;
+		virtual void addInCondition(std::string name, unsigned long long uid) = 0;
+		virtual void addInCondition(std::string name, std::shared_ptr<vl::inode> node) = 0;
+
 
 	
 	};

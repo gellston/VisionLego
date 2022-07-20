@@ -9,14 +9,14 @@
 
 
 
-vl::varBoolNode::varBoolNode(std::string name, vl::ihandle* engine) : vl::node(name, (int)vl::objectType::VL_CONST_NUMBER, false, engine) {
+vl::varBoolNode::varBoolNode(std::string name, vl::ihandle* engine) : vl::node(name, vl::to_integer(vl::objectType::VL_BOOL), false, engine) {
 
 	try {
 		this->setConst(false);
-		this->registerNode("flowIn", vl::to_integer(vl::objectType::VL_CONST_FLOW), vl::searchType::input);
+		this->registerNode("condition", vl::to_integer(vl::objectType::VL_CONST_FLOW), vl::searchType::input);
 		this->registerNode("input", vl::to_integer(vl::objectType::VL_CONST_BOOL), vl::searchType::input);
 
-		this->registerNode("flowOut", vl::to_integer(vl::objectType::VL_CONST_FLOW), vl::searchType::output);
+		this->registerNode("condition", vl::to_integer(vl::objectType::VL_CONST_FLOW), vl::searchType::output);
 		this->registerNode("output", vl::to_integer(vl::objectType::VL_CONST_BOOL), vl::searchType::output);
 	}
 	catch (std::exception e) {
