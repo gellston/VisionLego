@@ -41,7 +41,10 @@ namespace vl {
 	const int non_uid = 0;
 
 
-
+	enum class syncType {
+		serial,
+		parallel
+	};
 
 }
 

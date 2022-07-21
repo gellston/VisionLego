@@ -23,15 +23,23 @@ namespace vl {
 		virtual std::string message() = 0;
 		virtual bool isConst() = 0;
 		virtual bool inCondition() = 0;
-		virtual void setCondition(bool check) = 0 ;
+		virtual void setInCondition(bool check) = 0 ;
 		virtual void checkConnectivity() = 0;
 
 		virtual void name(std::string name) = 0;
 		virtual void uid(unsigned long long value) = 0;
 		virtual void depth(unsigned int depth) = 0;
 
+
+		virtual void init() = 0;
+		virtual void preprocess() = 0;
+		virtual void process() = 0;
+
+
 		virtual std::shared_ptr<vl::inode> input(std::string key) = 0;
 		virtual std::shared_ptr<vl::inode> output(std::string key) = 0;
+		virtual std::vector<std::string> condition() = 0;
+		virtual void runCondition(std::string key) = 0;
 		
 		virtual std::vector<input_info> input() = 0;
 		virtual std::vector<output_info> output() = 0;
@@ -44,6 +52,8 @@ namespace vl {
 		virtual void addInCondition(std::string name, unsigned long long uid) = 0;
 		virtual void addInCondition(std::string name, std::shared_ptr<vl::inode> node) = 0;
 
+		virtual void removeInCondtion(std::string name, unsigned long long uid) = 0;
+		virtual void removeInCondtion(std::string name, std::shared_ptr<vl::inode> node) = 0;
 
 	
 	};

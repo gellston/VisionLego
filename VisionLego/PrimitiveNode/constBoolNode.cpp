@@ -4,6 +4,7 @@
 #include "constBoolNode.h"
 
 
+
 namespace vl {
 	class impl_constBoolNode {
 	public:
@@ -50,6 +51,8 @@ void vl::constBoolNode::preprocess() {
 }
 
 void vl::constBoolNode::process() {
+
+
 
 
 }

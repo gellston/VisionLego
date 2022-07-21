@@ -7,7 +7,7 @@
 #include <constBoolNode.h>
 #include <constNumberNode.h>
 #include <constFlowNode.h>
-
+#include <condIfNode.h>
 
 
 VL_MODULE
@@ -22,6 +22,7 @@ VL_ADDON_INIT(vl::iengine* engine)
 		_addon->add<vl::constBoolNode>(vl::to_integer(vl::objectType::VL_CONST_BOOL), "Basic");
 		_addon->add<vl::constNumberNode>(vl::to_integer(vl::objectType::VL_CONST_NUMBER), "Basic");
 		_addon->add<vl::constFlowNode>(vl::to_integer(vl::objectType::VL_CONST_FLOW), "Basic");
+		_addon->add<vl::condIfNode>(vl::to_integer(vl::objectType::VL_IF), "Flow");
 		engine->registerAddon(_addon);
 	}
 	catch (std::exception e) {

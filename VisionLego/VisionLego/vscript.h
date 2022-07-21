@@ -35,7 +35,8 @@ namespace vl {
 		VL_SCRIPT_EXPORT void load(std::string context, vl::contextType type);
 		VL_SCRIPT_EXPORT void verification();
 		VL_SCRIPT_EXPORT void initNodes();
-		VL_SCRIPT_EXPORT void run();
+		VL_SCRIPT_EXPORT void setMaxTaskCount(int num);
+		VL_SCRIPT_EXPORT void run(vl::syncType sync=vl::syncType::serial);
 	
 		/*
 		Graph management

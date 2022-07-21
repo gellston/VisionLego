@@ -69,7 +69,7 @@ void vl::varBoolNode::process() {
 		output->set(value);
 
 		//std::cout << "uid = " << this->uid() << std::endl;
-
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 	catch (std::exception e) {
 		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());

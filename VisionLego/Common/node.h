@@ -49,7 +49,7 @@ namespace vl {
 		}
 
 		void setConst(bool isConst);
-
+		void registerCondition(std::string name);
 
 	public:
 
@@ -57,9 +57,9 @@ namespace vl {
 		virtual ~node();
 
 
-		virtual void init() = 0;
-		virtual void preprocess() = 0;
-		virtual void process() = 0;
+		//void init() override;
+		//void preprocess() override;
+		//void process() override;
 
 
 		int type() override;
@@ -68,7 +68,7 @@ namespace vl {
 		unsigned int depth() override;
 		bool isConst() override;
 		bool inCondition() override;
-		void setCondition(bool check) override;
+		void setInCondition(bool check) override;
 		bool error() override;
 		std::string message() override;
 		void checkConnectivity() override;
@@ -81,6 +81,7 @@ namespace vl {
 		//Get node information
 		std::vector<input_info> input() override;
 		std::vector<output_info> output() override;
+		std::vector<std::string> condition() override;
 
 		//Get uids if its connected node
 		std::vector<unsigned long long> inputUid() override;
@@ -93,6 +94,11 @@ namespace vl {
 		void addInCondition(std::string name, unsigned long long uid) override;
 		void addInCondition(std::string name, pointer_inode node) override;
 
+		void removeInCondtion(std::string name, unsigned long long uid) override;
+		void removeInCondtion(std::string name, pointer_inode node) override;
+
+
+		void runCondition(std::string key) override;
 
 
 		void name(std::string name);

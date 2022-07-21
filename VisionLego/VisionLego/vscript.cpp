@@ -7,6 +7,7 @@
 #include <random>
 #include <iostream>
 #include <algorithm>
+#include <future>
 
 
 #include <node.h>
@@ -22,14 +23,18 @@ namespace vl {
 	public:
 
 		std::unordered_map<unsigned long long, pointer_node> _nodes_table;
-		std::vector<pointer_node> _align_nodes;
+		//std::vector<pointer_node> _align_nodes;
+		std::unordered_map<unsigned int, std::vector<pointer_node>> _align_nodes;
 		std::unordered_map<std::string, HMODULE> _addon_handles;
 		std::vector<vl::addon_info> _addonInfo;
 		std::string _libraryPath;
 		std::vector<pointer_iaddon> _addons;
 
+		unsigned int _max_task_count;
+
 		impl_vscript() {
 
+			
 		}
 
 		~impl_vscript() {
@@ -97,7 +102,7 @@ namespace vl {
 
 		void depthAlign() {
 			//Depth align process start!
-			for (unsigned int depth = 1; depth <= this->deepDepth(); depth++) {
+			for (unsigned int depth = 1; depth <= this->deepDepth() + 1; depth++) {
 				std::vector<vl::pointer_node> equal_vectors;
 				for (auto& pair : this->_instance->_nodes_table) {
 					if (depth == pair.second->depth()) {
@@ -132,7 +137,7 @@ namespace vl {
 		void depthSorting() {
 			//Depth sorting process start!
 			this->_instance->_align_nodes.clear();
-			for (unsigned int depth = 1; depth <= this->deepDepth(); depth++) {
+			for (unsigned int depth = 1; depth <= this->deepDepth() + 1; depth++) {
 				std::vector<vl::pointer_node> equal_vectors;
 				for (auto& pair : this->_instance->_nodes_table) {
 					if (depth == pair.second->depth()) {
@@ -140,7 +145,7 @@ namespace vl {
 					}
 				}
 				for (auto& object : equal_vectors) {
-					this->_instance->_align_nodes.push_back(object);
+					this->_instance->_align_nodes[depth].push_back(object);
 				}
 			}
 		}
@@ -212,6 +217,8 @@ namespace vl {
 
 vl::vscript::vscript() : _instance(new vl::impl_vscript()), _engine(new vl::engine()) {
 	this->_engine->setScript(this->_instance.get());
+
+	this->_instance->_max_task_count = 4;
 }
 
 
@@ -332,23 +339,81 @@ std::vector<vl::addon_info> vl::vscript::addonInfo() {
 	return this->_instance->_addonInfo;
 }
 
-void vl::vscript::run() {
+void vl::vscript::run(vl::syncType sync) {
 
-	bool errorDetected = false;
+	volatile bool errorDetected = false;
 
-	for (auto& node : this->_instance->_align_nodes) {
-		try {
-			node->process();
+	
+	switch (sync)
+	{
+	case vl::syncType::serial: {
+		for (unsigned int depth = 1; depth < this->_engine->deepDepth() + 1; depth++) {
+			for (auto& node : this->_instance->_align_nodes[depth]) {
+				try {
+					if (node->inCondition() == true) continue;
+
+					node->process();
+				}
+				catch (vl::exception e) {
+					errorDetected = true;
+				}
+			}
 		}
-		catch (vl::exception e) {
-			errorDetected = true;
+		break;
+	}
+		
+	case vl::syncType::parallel: {
+
+		auto maxCount = this->_instance->_max_task_count;
+		for (unsigned int depth = 1; depth < this->_engine->deepDepth() + 1; depth++) {
+
+			auto _tasks = this->_instance->_align_nodes[depth];
+
+			volatile int currentIndex = 0;
+
+			std::vector<std::future<void>> _futures;
+			for (unsigned int currentIndex =0; currentIndex < _tasks.size(); currentIndex++) {
+
+				_futures.push_back(std::async(std::launch::async, [&](auto index) {
+					try {
+						_tasks[index]->process();
+					}
+					catch (vl::exception e) {
+						errorDetected = true;
+					}
+				}, currentIndex));
+
+
+				if (_futures.size() == maxCount) {
+					for (auto& future : _futures) {
+						future.wait();
+					}
+					_futures.clear();
+				}
+				
+			}
+
+			for (auto& future : _futures) {
+				future.wait();
+			}
 		}
+
+
+		break;
+	}
+	default:
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Invalid execution enum.");
+		throw vl::exception(message);
 	}
 
 	if (errorDetected == true) {
 		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Vision script run failed.");
 		throw vl::exception(message);
 	}
+}
+
+void vl::vscript::setMaxTaskCount(int num) {
+
 }
 
 void vl::vscript::verification() {
@@ -359,12 +424,16 @@ void vl::vscript::verification() {
 	/// 
 	bool errorDetected = false;
 
-	for (auto& node : this->_instance->_align_nodes) {
-		try {
-			node->checkConnectivity();
-		}
-		catch (vl::exception e) {
-			errorDetected = true;
+
+	for (unsigned int depth = 1; depth < this->_engine->deepDepth() + 1; depth++) {
+		for (auto& node : this->_instance->_align_nodes[depth]) {
+			try {
+
+				node->checkConnectivity();
+			}
+			catch (vl::exception e) {
+				errorDetected = true;
+			}
 		}
 	}
 
@@ -380,14 +449,17 @@ void vl::vscript::load(std::string context, vl::contextType type) {
 }
 
 void  vl::vscript::initNodes() {
+
 	bool errorDetected = false;
 
-	for (auto& node : this->_instance->_align_nodes) {
-		try {
-			node->init();
-		}
-		catch (vl::exception e) {
-			errorDetected = true;
+	for (unsigned int depth = 1; depth < this->_engine->deepDepth() + 1; depth++) {
+		for (auto& node : this->_instance->_align_nodes[depth]) {
+			try {
+				node->init();
+			}
+			catch (vl::exception e) {
+				errorDetected = true;
+			}
 		}
 	}
 
@@ -519,6 +591,8 @@ void vl::vscript::printNodeInfo() {
 		info += std::to_string(pair.second->type());
 		info += ",";
 		info += std::to_string(pair.second->depth());
+		info += ",";
+		info += pair.second->inCondition() == true ? "true" : "false";
 		info += "\n";
 		std::cout << info << std::endl;
 	}

@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="condIfNode.cpp" />
     <ClCompile Include="constFlowNode.cpp" />
     <ClCompile Include="constNumberNode.cpp" />
     <ClCompile Include="PrimitiveNode.cpp" />
@@ -155,6 +156,7 @@
     <ClCompile Include="varBoolNode.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="condIfNode.h" />
     <ClInclude Include="constBoolNode.h" />
     <ClInclude Include="constFlowNode.h" />
     <ClInclude Include="constNumberNode.h" />
