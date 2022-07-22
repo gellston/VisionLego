@@ -18,6 +18,18 @@ vl::varBoolNode::varBoolNode(std::string name, vl::ihandle* engine) : vl::node(n
 
 		this->registerNode("condition", vl::to_integer(vl::objectType::VL_CONST_FLOW), vl::searchType::output);
 		this->registerNode("output", vl::to_integer(vl::objectType::VL_CONST_BOOL), vl::searchType::output);
+
+
+
+		//parse preparation
+		this->property<bool>("input", [&](){
+			return this->input<vl::constBoolNode>("input")->get();
+		});
+
+		this->property<bool>("input", [&](bool value) {
+			this->input<vl::constBoolNode>("input")->set(value);
+		});
+
 	}
 	catch (std::exception e) {
 		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
@@ -50,7 +62,7 @@ void vl::varBoolNode::preprocess() {
 	try {
 		
 		//용도를 생각중.. 무슨 용도로 쓰면좋을가나
-
+		
 		
 	}
 	catch (std::exception e) {
@@ -68,8 +80,7 @@ void vl::varBoolNode::process() {
 		bool value = input->get();
 		output->set(value);
 
-		//std::cout << "uid = " << this->uid() << std::endl;
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+		//std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 	catch (std::exception e) {
 		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
@@ -78,3 +89,6 @@ void vl::varBoolNode::process() {
 }
 
 
+void vl::varBoolNode::primitive(vl::pointer_argument arg) {
+
+}

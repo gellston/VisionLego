@@ -26,6 +26,7 @@ namespace vl {
 		void init() override;
 		void preprocess() override;
 		void process() override;
+		void primitive(vl::pointer_argument arg) override;
 
 	};
 }

@@ -5,6 +5,8 @@
 
 
 #include <stack>
+#include <string>
+#include <nlohmann/json.hpp>
 
 
 namespace vl {
@@ -32,7 +34,23 @@ namespace vl {
 		std::vector<vl::output_info> _outputInfo;
 
 
-		std::unordered_map<std::string, std::vector<pointer_inode>> _conditional_node_map;
+		std::unordered_map<std::string, std::vector<unsigned long long>> _conditional_node_map;
+
+
+
+
+		std::unordered_map<std::string, std::function<void(double)>> _doubleSetCallback;
+		std::unordered_map<std::string, std::function<void(int)>> _intSetCallback;
+		std::unordered_map<std::string, std::function<void(std::string)>> _stringSetCallback;
+		std::unordered_map<std::string, std::function<void(bool)>> _boolSetCallback;
+
+
+		std::unordered_map<std::string, std::function<double()>> _doubleRetCallback;
+		std::unordered_map<std::string, std::function<int()>> _intRetCallback;
+		std::unordered_map<std::string, std::function<std::string()>> _stringRetCallback;
+		std::unordered_map<std::string, std::function<bool()>> _boolRetCallback;
+
+
 
 		impl_node() {
 			_uid = 0;
@@ -79,6 +97,314 @@ vl::node::~node() {
 }
 
 
+
+template<> void vl::node::property(std::string name, std::function<void(std::string)> callback) {
+	this->_instance->_stringSetCallback[name] = callback;
+}
+template<> void vl::node::property(std::string name, std::function<void(double)> callback) {
+	this->_instance->_doubleSetCallback[name] = callback;
+}
+template<> void vl::node::property(std::string name, std::function<void(int)> callback) {
+	this->_instance->_intSetCallback[name] = callback;
+}
+
+template<> void vl::node::property(std::string name, std::function<void(bool)> callback) {
+	this->_instance->_boolSetCallback[name] = callback;
+}
+
+
+
+
+
+template<> void vl::node::property(std::string name, std::function<double()> callback) {
+	this->_instance->_doubleRetCallback[name] = callback;
+}
+template<> void vl::node::property(std::string name, std::function<std::string()> callback) {
+	this->_instance->_stringRetCallback[name] = callback;
+}
+template<> void vl::node::property(std::string name, std::function<int()> callback) {
+	this->_instance->_intRetCallback[name] = callback;
+}
+template<> void vl::node::property(std::string name, std::function<bool()> callback) {
+	this->_instance->_boolRetCallback[name] = callback;
+}
+
+
+
+std::string vl::node::serialization() {
+
+	try {
+		nlohmann::json object;
+
+		object["name"] = this->name();
+		object["uid"] = this->uid();
+		object["depth"] = this->depth();
+		object["type"] = this->type();
+		object["inCondition"] = this->inCondition();
+
+		object["double"] = {};
+		object["string"] = {};
+		object["int"] = {};
+		object["bool"] = {};
+		object["connection"] = {};
+		object["condition"] = {};
+
+
+
+		// connection
+		for (auto& input : this->_instance->_inputNode) {
+			auto key = input.first;
+			auto uid = std::get<3>(input.second);
+			auto isConst = std::get<2>(input.second);
+
+			if (isConst == false) {
+				object["connection"].push_back({ key, uid });
+			}
+		}
+		//double serialization
+		for (auto& keypair : this->_instance->_doubleRetCallback) {
+			std::string key = keypair.first;
+			auto callback = keypair.second;
+			object["double"].push_back({ key, callback() });
+		}
+		//int serialization
+		for (auto& keypair : this->_instance->_intRetCallback) {
+			std::string key = keypair.first;
+			auto callback = keypair.second;
+			object["int"].push_back({ key, callback() });
+		}
+		//string serialization
+		for (auto& keypair : this->_instance->_stringRetCallback) {
+			std::string key = keypair.first;
+			auto callback = keypair.second;
+			object["string"].push_back({ key, callback() });
+		}
+		//bool serialization
+		for (auto& keypair : this->_instance->_boolRetCallback) {
+			std::string key = keypair.first;
+			auto callback = keypair.second;
+			object["bool"].push_back({ key, callback() });
+		}
+		//condition serialization
+		for (auto& keypair : this->_instance->_conditional_node_map) {
+			std::string key = keypair.first;
+			for (auto& uniqueKey : keypair.second) {
+				object["condition"].push_back({ key, uniqueKey });
+			}
+		}
+		return object.dump();
+	}
+	catch (std::exception e) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
+	}
+}
+
+std::string vl::node::beautify() {
+	try {
+		nlohmann::json object;
+
+		object["name"] = this->name();
+		object["uid"] = this->uid();
+		object["depth"] = this->depth();
+		object["type"] = this->type();
+		object["inCondition"] = this->inCondition();
+
+		object["double"] = {};
+		object["string"] = {};
+		object["int"] = {};
+		object["bool"] = {};
+		object["connection"] = {};
+
+
+
+		// connection
+		for (auto& input : this->_instance->_inputNode) {
+			auto key = input.first;
+			auto uid = std::get<3>(input.second);
+			auto isConst = std::get<2>(input.second);
+
+			if (isConst == false) {
+				object["connection"].push_back({ key, uid });
+			}
+		}
+		//double serialization
+		for (auto& keypair : this->_instance->_doubleRetCallback) {
+			std::string key = keypair.first;
+			auto callback = keypair.second;
+			object["double"].push_back({ key, callback() });
+		}
+		//int serialization
+		for (auto& keypair : this->_instance->_intRetCallback) {
+			std::string key = keypair.first;
+			auto callback = keypair.second;
+			object["int"].push_back({ key, callback() });
+		}
+		//string serialization
+		for (auto& keypair : this->_instance->_stringRetCallback) {
+			std::string key = keypair.first;
+			auto callback = keypair.second;
+			object["string"].push_back({ key, callback() });
+		}
+		//bool serialization
+		for (auto& keypair : this->_instance->_boolRetCallback) {
+			std::string key = keypair.first;
+			auto callback = keypair.second;
+			object["bool"].push_back({ key, callback() });
+		}
+		//condition serialization
+		for (auto& keypair : this->_instance->_conditional_node_map) {
+			std::string key = keypair.first;
+			for (auto& uniqueKey : keypair.second) {
+				object["condition"].push_back({ key, uniqueKey });
+			}
+		}
+		return object.dump(4);
+	}
+	catch (std::exception e) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
+	}
+}
+
+void vl::node::parse(std::string content) {
+	try {
+		auto object = nlohmann::json::parse(content);
+
+		if (object["type"] != this->type()) {
+			std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Invalid object type");
+			throw vl::exception(message);
+		}
+
+
+		this->name(object["name"]);
+		this->uid(object["uid"]);
+		this->depth(object["depth"]);
+		this->setInCondition(object["inCondition"]);
+
+
+
+		auto connection = object["connection"];
+		if (connection != nullptr) {
+			for (auto& element : connection) {
+				std::string name = element[0];
+				unsigned long long uniqueKey = element[1];
+
+				for (auto& input : this->_instance->_inputNode) {
+					auto _targetName = input.first;
+					std::get<2>(input.second) = true;
+					if (_targetName == name) {
+						std::get<2>(input.second) = false;
+						std::get<3>(input.second) = uniqueKey;
+					}
+				}
+			}
+		}
+
+
+
+		//ConditionMap uid Clear
+		for (auto& keyPair : this->_instance->_conditional_node_map) {
+			keyPair.second.clear();
+		}
+
+		auto _connection = object["condition"];
+		if (_connection != nullptr) {
+			for (auto& element : _connection) {
+				std::string name = element[0];
+				unsigned int depth = element[1];
+
+				if (this->_instance->_conditional_node_map.find(name) != this->_instance->_conditional_node_map.end()) {
+					this->_instance->_conditional_node_map[name].push_back(depth);
+				}
+			}
+		}
+
+		auto _bool = object["bool"];
+		if (_bool != nullptr) {
+			for (auto& element : _bool) {
+				std::string name = element[0];
+				bool check = element[1];
+
+				for (auto& input : this->_instance->_inputNode) {
+					auto _targetName = input.first;
+					if (_targetName == name) {
+						auto node = std::get<1>(input.second);
+						vl::pointer_argument arg(new vl::argument());
+						arg->add("value", check);
+						node->primitive(arg);
+					}
+				}
+			}
+		}
+
+
+		auto _double = object["double"];
+		if (_double != nullptr) {
+			for (auto& element : _double) {
+				std::string name = element[0];
+				double check = element[1];
+
+				for (auto& input : this->_instance->_inputNode) {
+					auto _targetName = input.first;
+					if (_targetName == name) {
+						auto node = std::get<1>(input.second);
+						vl::pointer_argument arg(new vl::argument());
+						arg->add("value", check);
+						node->primitive(arg);
+					}
+				}
+			}
+		}
+
+
+		auto _string = object["string"];
+		if (_string != nullptr) {
+			for (auto& element : _string) {
+				std::string name = element[0];
+				std::string check = element[1];
+
+				for (auto& input : this->_instance->_inputNode) {
+					auto _targetName = input.first;
+					if (_targetName == name) {
+						auto node = std::get<1>(input.second);
+						vl::pointer_argument arg(new vl::argument());
+						arg->add("value", check);
+						node->primitive(arg);
+					}
+				}
+			}
+		}
+
+
+		auto _int = object["int"];
+		if (_int != nullptr) {
+			for (auto& element : _int) {
+				std::string name = element[0];
+				int check = element[1];
+
+				for (auto& input : this->_instance->_inputNode) {
+					auto _targetName = input.first;
+					if (_targetName == name) {
+						auto node = std::get<1>(input.second);
+						vl::pointer_argument arg(new vl::argument());
+						arg->add("value", check);
+						node->primitive(arg);
+					}
+				}
+			}
+		}
+
+	}
+	catch (vl::exception e) {
+		throw e;
+	}
+
+
+
+}
+
+
 unsigned long long vl::node::uid() {
 
 	return this->_instance->_uid;
@@ -115,13 +441,6 @@ void vl::node::depth(unsigned int depth) {
 		this->_instance->_engine->depthUpdate(depth);
 }
 
-bool vl::node::error() {
-	return this->_instance->_error;
-}
-
-std::string vl::node::message() {
-	return this->_instance->_message;
-}
 
 bool vl::node::inCondition() {
 	return this->_instance->_inCondition;
@@ -242,7 +561,8 @@ void vl::node::registerCondition(std::string name) {
 	}
 
 
-	this->_instance->_conditional_node_map[name] = std::vector<vl::pointer_inode>();
+
+	this->_instance->_conditional_node_map[name] = std::vector<unsigned long long>();
 }
 
 
@@ -284,7 +604,8 @@ vl::pointer_node vl::node::searchNode(std::string name, vl::searchType type) {
 
 		}
 		catch (vl::exception exception) {
-			throw exception;
+			std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, exception.what());
+			throw vl::exception(message);
 		}
 
 		break;
@@ -391,10 +712,10 @@ void vl::node::connect(std::string outkey, unsigned long long outUid, std::strin
 			_node_stack.push(uid);
 		
 		while (_node_stack.empty() != true) {
-			auto _cyrrebtUid = _node_stack.top();
+			auto _currentUID = _node_stack.top();
 			_node_stack.pop();
 
-			auto _currentOutNode = this->_instance->_engine->find(_cyrrebtUid);
+			auto _currentOutNode = this->_instance->_engine->find(_currentUID);
 			auto _currentUid = _currentOutNode->outputUid();
 			if (outNode == _currentOutNode) {
 				std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Recursive node error");
@@ -480,7 +801,8 @@ void vl::node::disconnect(std::string inKey) {
 		this->depth(deepDepth);
 	}
 	catch (vl::exception e) {
-		throw e;
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
 	}
 
 	this->_instance->_engine->depthAlign();
@@ -509,7 +831,7 @@ void vl::node::addInCondition(std::string name, unsigned long long uid) {
 		for (auto& condition_map : this->_instance->_conditional_node_map) {
 			auto& condition_vector = condition_map.second;
 
-			if (std::find(condition_vector.begin(), condition_vector.end(), node) != condition_vector.end()) {
+			if (std::find(condition_vector.begin(), condition_vector.end(), node->uid()) != condition_vector.end()) {
 				std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Exist node in condition map");
 				throw vl::exception(message);
 			}
@@ -568,7 +890,7 @@ void vl::node::addInCondition(std::string name, unsigned long long uid) {
 
 
 		//여기서 부터코딩
-		this->_instance->_conditional_node_map[name].push_back(node);
+		this->_instance->_conditional_node_map[name].push_back(node->uid());
 
 	}
 	catch (vl::exception e) {
@@ -587,7 +909,8 @@ void vl::node::addInCondition(std::string name, pointer_inode node) {
 		this->addInCondition(name, node->uid());
 	}
 	catch (vl::exception e) {
-		throw e;
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
 	}
 }
 
@@ -612,7 +935,7 @@ void vl::node::removeInCondtion(std::string name, unsigned long long uid) {
 		for (auto& condition_map : this->_instance->_conditional_node_map) {
 			auto& condition_vector = condition_map.second;
 
-			if (std::find(condition_vector.begin(), condition_vector.end(), node) != condition_vector.end()) {
+			if (std::find(condition_vector.begin(), condition_vector.end(), node->uid()) != condition_vector.end()) {
 				found = true;
 			}
 		}
@@ -652,12 +975,12 @@ void vl::node::removeInCondtion(std::string name, unsigned long long uid) {
 
 
 		//여기서 부터코딩
-		this->_instance->_conditional_node_map[name].push_back(node);
-		std::remove(this->_instance->_conditional_node_map[name].begin(), this->_instance->_conditional_node_map[name].end(), node);
-
+		this->_instance->_conditional_node_map[name].push_back(node->uid());
+		std::remove(this->_instance->_conditional_node_map[name].begin(), this->_instance->_conditional_node_map[name].end(), node->uid());
 	}
 	catch (vl::exception e) {
-		throw e;
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
 	}
 
 
@@ -676,7 +999,8 @@ void vl::node::removeInCondtion(std::string name, pointer_inode node) {
 		this->removeInCondtion(name, node->uid());
 	}
 	catch (vl::exception e) {
-		throw e;
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
 	}
 }
 
@@ -695,15 +1019,18 @@ void vl::node::runCondition(std::string name) {
 
 		for (auto & task : taskes) {
 			try {
-				task->process();
+				auto node = this->_instance->_engine->find(task);
+				node->process();
 			}
 			catch (vl::exception e) {
-				throw e;
+				std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+				throw vl::exception(message);
 			}
 		}
 	}
 	catch (vl::exception e) {
-		throw e;
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
 	}
 
 }

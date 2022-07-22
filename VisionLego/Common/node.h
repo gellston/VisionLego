@@ -7,6 +7,7 @@
 #include <memory>
 #include <vector>
 #include <unordered_map>
+#include <functional>
 
 
 #include "vlenum.h"
@@ -48,19 +49,34 @@ namespace vl {
 			}
 		}
 
+
 		void setConst(bool isConst);
 		void registerCondition(std::string name);
+
+
+		template<typename T> void property(std::string name, std::function<void(T)> callback) {
+
+		}
+
+		template<typename T> void property(std::string name, std::function<T()> callback) {
+
+		}
+
+		template<> void property(std::string name, std::function<void(std::string)> callback);
+		template<> void property(std::string name, std::function<void(double)> callback);
+		template<> void property(std::string name, std::function<void(int)> callback);
+		template<> void property(std::string name, std::function<void(bool)> callback);
+		
+
+		template<> void property(std::string name, std::function<double()> callback);
+		template<> void property(std::string name, std::function<std::string()> callback);
+		template<> void property(std::string name, std::function<int()> callback);
+		template<> void property(std::string name, std::function<bool()> callback);
 
 	public:
 
 		node(std::string name, int type, bool isConst, vl::ihandle* engine);
 		virtual ~node();
-
-
-		//void init() override;
-		//void preprocess() override;
-		//void process() override;
-
 
 		int type() override;
 		std::string name() override;
@@ -69,14 +85,16 @@ namespace vl {
 		bool isConst() override;
 		bool inCondition() override;
 		void setInCondition(bool check) override;
-		bool error() override;
-		std::string message() override;
 		void checkConnectivity() override;
 
 
 		//Find const node
 		std::shared_ptr<vl::inode> input(std::string key) override;
 		std::shared_ptr<vl::inode> output(std::string key) override;
+		template<typename T> std::shared_ptr<T> input(std::string name) {
+			return std::dynamic_pointer_cast<T>(this->input(name));
+		}
+
 
 		//Get node information
 		std::vector<input_info> input() override;
@@ -105,7 +123,9 @@ namespace vl {
 		void uid(unique value);
 		void depth(unsigned int depth);
 
-		
+		std::string serialization() override;
+		std::string beautify() override;
+		void parse(std::string content) override;
 	};
 
 }

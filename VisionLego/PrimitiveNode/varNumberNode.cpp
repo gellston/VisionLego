@@ -15,6 +15,17 @@ vl::varNumberNode::varNumberNode(std::string name, vl::ihandle* engine) : vl::no
 
 		this->registerNode("condition", vl::to_integer(vl::objectType::VL_CONST_FLOW), vl::searchType::output);
 		this->registerNode("output", vl::to_integer(vl::objectType::VL_CONST_NUMBER), vl::searchType::output);
+
+
+		//parse preparation
+		this->property<double>("input", [&]() {
+			return this->input<vl::constNumberNode>("input")->get();
+		});
+
+		this->property<double>("input", [&](double value) {
+			this->input<vl::constNumberNode>("input")->set(value);
+		});
+
 	}
 	catch (std::exception e) {
 		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
@@ -64,3 +75,6 @@ void vl::varNumberNode::process() {
 }
 
 
+void vl::varNumberNode::primitive(vl::pointer_argument arg) {
+
+}

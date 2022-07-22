@@ -41,3 +41,7 @@ void vl::constFlowNode::process() {
 
 
 }
+
+void vl::constFlowNode::primitive(vl::pointer_argument arg) {
+
+}

@@ -56,3 +56,12 @@ void vl::constBoolNode::process() {
 
 
 }
+
+void vl::constBoolNode::primitive(vl::pointer_argument arg) {
+	try {
+		this->setConst(arg->get<bool>("value"));
+	}
+	catch (vl::exception e) {
+		throw e;
+	}
+}

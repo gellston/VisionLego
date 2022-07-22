@@ -21,6 +21,16 @@ vl::condIfNode::condIfNode(std::string name, vl::ihandle* engine) : vl::node(nam
 		this->registerCondition("if");
 		this->registerCondition("else");
 
+
+		//parse preparation
+		this->property<bool>("check", [&]() {
+			return this->input<vl::constBoolNode>("check")->get();
+			});
+
+		this->property<bool>("check", [&](bool value) {
+			this->input<vl::constBoolNode>("check")->set(value);
+		});
+
 	}
 	catch (std::exception e) {
 		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
@@ -58,18 +68,18 @@ void vl::condIfNode::process() {
 		auto check = this->searchNode<vl::constBoolNode>("check", vl::searchType::input);
 
 		if (check->get() == true) {
-			std::cout << "if condition" << std::endl;
 			this->runCondition("if");
-			std::cout << "if condition" << std::endl;
 		}
 		else {
-			std::cout << "else condition" << std::endl;
 			this->runCondition("else");
-			std::cout << "else condition" << std::endl;
 		}
 	}
 	catch (std::exception e) {
 		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
 		throw vl::exception(message);
 	}
+}
+
+void vl::condIfNode::primitive(vl::pointer_argument arg) {
+
 }

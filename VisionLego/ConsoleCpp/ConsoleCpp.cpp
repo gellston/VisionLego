@@ -54,11 +54,20 @@ int main()
         auto node20 = script.addNode("test8", vl::to_integer(vl::objectType::VL_BOOL));
         auto node21 = script.addNode("test8", vl::to_integer(vl::objectType::VL_BOOL));
 
+
+
+        //auto node30 = script.addNode("test8", vl::to_integer(vl::objectType::VL_IF));
+        //node30->addInCondition("if", node21);
+
+
        
 
         script.connect(node1, "output", node9, "input");
         script.connect(node1, "output", node10, "input");
         script.connect(node1, "output", node11, "input");
+
+
+
 
 
         script.connect(node2, "output", node12, "input");
@@ -79,12 +88,17 @@ int main()
 
 
         script.printNodeInfo();
-
-
-
-
         script.setMaxTaskCount(4);
 
+
+
+        script.save("d://test.script");
+        script.load("d://test.script", vl::contextType::file);
+        script.save("d://test2.script");
+
+
+
+        script.printNodeInfo();
 
 
         std::chrono::steady_clock::time_point begin;
@@ -105,22 +119,7 @@ int main()
         std::cout << "parallel processing time = " << elapseTime << std::endl;
 
 
-        //std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-        //int fps = 0;
-        //while(true) {
-        //    script.run();
-        //    fps++;
-        //    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-
-        //    auto elapseTime =  std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-
-        //    if (elapseTime > 1000) {
-        //        std::cout << "fps = " << fps << std::endl;
-        //        begin = std::chrono::steady_clock::now();
-        //        fps = 0;
-        //    }
-
-        //}
+       
 
 
     }

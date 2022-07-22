@@ -22,6 +22,9 @@ namespace vl {
 		virtual void depthAlign() = 0;
 		virtual void depthSorting() = 0;
 		virtual std::vector<unsigned long long> searchInputUID(unsigned long long inputUid, unsigned int depth) = 0;
+
+
+		
 	};
 
 	using pointer_iengine = std::shared_ptr<vl::iengine>;

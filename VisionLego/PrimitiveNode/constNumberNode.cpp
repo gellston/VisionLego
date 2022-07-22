@@ -54,4 +54,11 @@ void vl::constNumberNode::process() {
 
 }
 
-
+void vl::constNumberNode::primitive(vl::pointer_argument arg) {
+	try {
+		this->setConst(arg->get<double>("value"));
+	}
+	catch (vl::exception e) {
+		throw e;
+	}
+}

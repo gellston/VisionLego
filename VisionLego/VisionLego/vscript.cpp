@@ -5,9 +5,11 @@
 #include <filesystem>
 #include <Windows.h>
 #include <random>
-#include <iostream>
 #include <algorithm>
 #include <future>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
 
 #include <node.h>
@@ -15,6 +17,9 @@
 #include <macro.h>
 #include <iconstructor.h>
 #include <iengine.h>
+
+#include <nlohmann/json.hpp>
+
 
 
 namespace vl {
@@ -95,7 +100,8 @@ namespace vl {
 				return const_output;
 			}
 			catch (vl::exception e) {
-				throw e;
+				std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+				throw vl::exception(message);
 			}
 		}
 
@@ -211,6 +217,9 @@ namespace vl {
 			}
 			return uidResult;
 		}
+
+
+		
 	};
 }
 
@@ -247,6 +256,12 @@ void vl::vscript::loadLibrary() {
 
 	if (this->_instance->_addon_handles.size() > 0) {
 		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "library is already loaded.");
+		throw vl::exception(message);
+	}
+
+
+	if (this->_instance->_libraryPath.length() == 0) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Invalid library path.");
 		throw vl::exception(message);
 	}
 
@@ -323,7 +338,8 @@ void vl::vscript::unloadLibrary() {
 		}
 	}
 	catch (vl::exception e) {
-		throw e;
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
 	}
 	catch (std::exception e) {
 		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
@@ -355,6 +371,7 @@ void vl::vscript::run(vl::syncType sync) {
 					node->process();
 				}
 				catch (vl::exception e) {
+					std::cout << e.what() << std::endl;
 					errorDetected = true;
 				}
 			}
@@ -412,8 +429,20 @@ void vl::vscript::run(vl::syncType sync) {
 	}
 }
 
-void vl::vscript::setMaxTaskCount(int num) {
+void vl::vscript::save(std::string path) {
+	try {
+		std::ofstream out(path);
+		out << this->serialization();
+		out.close();
+	}
+	catch (std::exception e) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
+	}
+}
 
+void vl::vscript::setMaxTaskCount(int num) {
+	this->_instance->_max_task_count = num;
 }
 
 void vl::vscript::verification() {
@@ -445,7 +474,78 @@ void vl::vscript::verification() {
 }
 
 void vl::vscript::load(std::string context, vl::contextType type) {
+	try {
 
+
+		switch (type)
+		{
+		case vl::contextType::file: {
+
+			std::ifstream inFile;
+			inFile.open(context); //open the input file
+
+			std::stringstream strStream;
+			strStream << inFile.rdbuf(); //read the file
+			std::string content = strStream.str();
+
+
+			std::vector<std::string> lines;
+			auto ss = std::stringstream{ content };
+
+			for (std::string line; std::getline(ss, line, '\n');)
+				lines.push_back(line);
+
+			this->clearNode();
+
+			for (auto& line : lines) {
+				auto object = nlohmann::json::parse(line);
+				int type = object["type"];
+				unsigned long long uid = object["uid"];
+
+				auto node = this->addNode("", type, uid);
+				node->parse(line);
+			}
+			
+			this->_engine->depthAlign();
+			this->_engine->depthSorting();
+
+			break;
+		}
+			
+		case vl::contextType::json: {
+
+			std::vector<std::string> lines;
+			auto ss = std::stringstream{ context };
+
+			for (std::string line; std::getline(ss, line, '\n');)
+				lines.push_back(line);
+
+			this->clearNode();
+
+			for (auto& line : lines) {
+				auto object = nlohmann::json::parse(line);
+				int type = object["type"];
+				unsigned long long uid = object["uid"];
+
+				auto node = this->addNode("", type, uid);
+				node->parse(line);
+			}
+
+			this->_engine->depthAlign();
+			this->_engine->depthSorting();
+
+			break;
+		}
+		default:
+			std::string message = vl::generate_error_message(__FUNCTION__, __LINE__,"Invalid load type");
+			throw vl::exception(message);
+			break;
+		}
+	}
+	catch (std::exception e) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
+	}
 }
 
 void  vl::vscript::initNodes() {
@@ -465,6 +565,48 @@ void  vl::vscript::initNodes() {
 
 	if (errorDetected == true) {
 		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Vision verification failed.");
+		throw vl::exception(message);
+	}
+}
+
+vl::pointer_node vl::vscript::addNode(std::string name, int objectType, unsigned long long uid) {
+	try {
+		for (auto addon : this->_instance->_addons) {
+			if (addon->exist(objectType) == true) {
+				auto constructor = addon->find(objectType);
+				auto node = constructor->create(name, this->_engine.get());
+				if (node->isConst() == true) {
+					std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Const object type error");
+					throw vl::exception(message);
+				}
+
+				std::random_device rd;
+				std::mt19937_64 mersenne(rd());
+				std::uniform_int_distribution<unsigned long long int> dice(1, INT64_MAX);
+
+				unsigned long long unique_id = uid;
+
+				node->uid(unique_id);
+				node->name(name);
+				node->depth(1);
+
+				auto convertedNode = std::dynamic_pointer_cast<vl::node>(node);
+				this->_instance->_nodes_table[unique_id] = convertedNode;
+
+
+				//Sorting Start;
+				this->_engine->depthSorting();
+
+
+				return convertedNode;
+			}
+		}
+
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, "Object tpye not exists");
+		throw vl::exception(message);
+	}
+	catch (std::exception e) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
 		throw vl::exception(message);
 	}
 }
@@ -535,7 +677,8 @@ void vl::vscript::connect(pointer_inode outNode, std::string outKey, pointer_ino
 		inNode->connect(outKey, outNode->uid(), inKey);
 	}
 	catch (vl::exception e) {
-		throw e;
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
 	}
 }
 
@@ -547,7 +690,8 @@ void vl::vscript::connect(unsigned long long outUid, std::string outKey, unsigne
 		this->connect(outNode, outKey, inNode, inKey);
 	}
 	catch (vl::exception e) {
-		throw e;
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
 	}
 }
 
@@ -557,7 +701,8 @@ void vl::vscript::disconnect(pointer_inode inNode, std::string inKey) {
 		this->disconnect(inNode->uid(), inKey);
 	}
 	catch (vl::exception e) {
-		throw e;
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
 	}
 }
 
@@ -567,7 +712,8 @@ void vl::vscript::disconnect(unsigned long long inUid, std::string inKey) {
 		inNode->disconnect(inKey);
 	}
 	catch (vl::exception e) {
-		throw e;
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
 	}
 }
 
@@ -597,4 +743,14 @@ void vl::vscript::printNodeInfo() {
 		std::cout << info << std::endl;
 	}
 	std::cout << "=============================" << std::endl;
+}
+
+std::string vl::vscript::serialization() {
+	std::string content;
+	for (auto& keyPair : this->_instance->_nodes_table) {
+		auto& node = keyPair.second;
+		content += node->serialization();
+		content += "\n";
+	}
+	return content;
 }

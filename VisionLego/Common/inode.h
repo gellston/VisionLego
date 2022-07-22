@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "ihandle.h"
+#include "argument.h"
 
 namespace vl {
 	using input_info = std::tuple<std::string, int>;
@@ -19,8 +20,9 @@ namespace vl {
 		virtual unsigned long long uid() = 0;
 		virtual unsigned int depth() = 0;
 
-		virtual bool error() = 0;
-		virtual std::string message() = 0;
+
+
+
 		virtual bool isConst() = 0;
 		virtual bool inCondition() = 0;
 		virtual void setInCondition(bool check) = 0 ;
@@ -34,6 +36,11 @@ namespace vl {
 		virtual void init() = 0;
 		virtual void preprocess() = 0;
 		virtual void process() = 0;
+		virtual void primitive(vl::pointer_argument arg) = 0;
+
+		
+		
+
 
 
 		virtual std::shared_ptr<vl::inode> input(std::string key) = 0;
@@ -55,6 +62,10 @@ namespace vl {
 		virtual void removeInCondtion(std::string name, unsigned long long uid) = 0;
 		virtual void removeInCondtion(std::string name, std::shared_ptr<vl::inode> node) = 0;
 
+
+		virtual std::string serialization() = 0;
+		virtual std::string beautify() = 0;
+		virtual void parse(std::string content) = 0;
 	
 	};
 
