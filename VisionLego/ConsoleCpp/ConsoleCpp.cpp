@@ -56,8 +56,8 @@ int main()
 
 
 
-        //auto node30 = script.addNode("test8", vl::to_integer(vl::objectType::VL_IF));
-        //node30->addInCondition("if", node21);
+        auto node30 = script.addNode("test8", vl::to_integer(vl::objectType::VL_IF));
+        node30->addInCondition("if", node21);
 
 
        
@@ -91,10 +91,12 @@ int main()
         script.setMaxTaskCount(4);
 
 
+        
 
-        script.save("d://test.script");
-        script.load("d://test.script", vl::contextType::file);
-        script.save("d://test2.script");
+
+        script.save("C://Github//test//test.txt");
+        script.load(script.serialization(), vl::contextType::json);
+        script.save("C://Github//test//test2.txt");
 
 
 

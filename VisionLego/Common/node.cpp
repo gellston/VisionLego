@@ -156,9 +156,10 @@ std::string vl::node::serialization() {
 			auto key = input.first;
 			auto uid = std::get<3>(input.second);
 			auto isConst = std::get<2>(input.second);
+			auto outputKey = std::get<4>(input.second);
 
 			if (isConst == false) {
-				object["connection"].push_back({ key, uid });
+				object["connection"].push_back({ key, uid, outputKey });
 			}
 		}
 		//double serialization
@@ -223,9 +224,9 @@ std::string vl::node::beautify() {
 			auto key = input.first;
 			auto uid = std::get<3>(input.second);
 			auto isConst = std::get<2>(input.second);
-
+			auto outputKey = std::get<4>(input.second);
 			if (isConst == false) {
-				object["connection"].push_back({ key, uid });
+				object["connection"].push_back({ key, uid, outputKey });
 			}
 		}
 		//double serialization
@@ -289,19 +290,19 @@ void vl::node::parse(std::string content) {
 			for (auto& element : connection) {
 				std::string name = element[0];
 				unsigned long long uniqueKey = element[1];
+				std::string outKey = element[2];
 
 				for (auto& input : this->_instance->_inputNode) {
+
 					auto _targetName = input.first;
-					std::get<2>(input.second) = true;
 					if (_targetName == name) {
 						std::get<2>(input.second) = false;
 						std::get<3>(input.second) = uniqueKey;
+						std::get<4>(input.second) = outKey;
 					}
 				}
 			}
 		}
-
-
 
 		//ConditionMap uid Clear
 		for (auto& keyPair : this->_instance->_conditional_node_map) {
@@ -870,7 +871,7 @@ void vl::node::addInCondition(std::string name, unsigned long long uid) {
 
 
 		//모든 연결된 노드들을 condition Node들로 변경
-		node->connect("condition", this->uid(), "condition");
+		node->connect("flow", this->uid(), "flow");
 		node->setInCondition(true);
 		
 

@@ -580,10 +580,6 @@ vl::pointer_node vl::vscript::addNode(std::string name, int objectType, unsigned
 					throw vl::exception(message);
 				}
 
-				std::random_device rd;
-				std::mt19937_64 mersenne(rd());
-				std::uniform_int_distribution<unsigned long long int> dice(1, INT64_MAX);
-
 				unsigned long long unique_id = uid;
 
 				node->uid(unique_id);
@@ -595,7 +591,7 @@ vl::pointer_node vl::vscript::addNode(std::string name, int objectType, unsigned
 
 
 				//Sorting Start;
-				this->_engine->depthSorting();
+				//this->_engine->depthSorting();
 
 
 				return convertedNode;

@@ -146,6 +146,7 @@
     <ClCompile Include="Common.cpp" />
     <ClCompile Include="node.cpp" />
     <ClCompile Include="nodeInfo.cpp" />
+    <ClCompile Include="property.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addon.h" />
@@ -159,6 +160,7 @@
     <ClInclude Include="ihandle.h" />
     <ClInclude Include="macro.h" />
     <ClInclude Include="node.h" />
+    <ClInclude Include="property.h" />
     <ClInclude Include="vlenum.h" />
     <ClInclude Include="vlexception.h" />
     <ClInclude Include="iengine.h" />
