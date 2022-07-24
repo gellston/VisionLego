@@ -8,6 +8,7 @@
 
 #include "ihandle.h"
 #include "argument.h"
+#include "property.h"
 
 namespace vl {
 	using input_info = std::tuple<std::string, int>;
@@ -36,8 +37,8 @@ namespace vl {
 		virtual void init() = 0;
 		virtual void preprocess() = 0;
 		virtual void process() = 0;
-		virtual void primitive(vl::pointer_argument arg) = 0;
-
+		virtual void onUpdatePrimitive() = 0;
+		virtual void changePrimitive(vl::pointer_property prop) = 0;
 		
 		
 

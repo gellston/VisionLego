@@ -6,9 +6,14 @@
 
 #include <memory>
 #include <iostream>
-
+#include <tuple>
+#include <vector>
 
 namespace vl {
+
+
+	using property_data = std::tuple<std::string, std::string, std::string>;
+
 	class impl_property;
 	class property {
 
@@ -19,10 +24,17 @@ namespace vl {
 		property();
 		~property();
 
-		int get(std::string key, int dummy = 0);
-		double get(std::string key, double dummy = 0);
-		std::string get(std::string key, std::string dummy = "");
-		bool get(std::string key, bool dummy = false);
+
+		template<typename T> T get(std::string key, T dummy) {
+			T value;
+			return value;
+		}
+
+		template<> int get<int>(std::string key, int dummy);
+		template<> double get<double>(std::string key, double dummy);
+		template<> std::string get<std::string>(std::string key, std::string dummy);
+		template<> bool get<bool>(std::string key, bool dummy);
+
 
 		void set(std::string key, int value);
 		void set(std::string key, double value);
@@ -30,10 +42,16 @@ namespace vl {
 		void set(std::string key, bool value);
 
 
-		void parse(std::string key, std::string type, std::string value);
+		void parse(std::string type, std::string key, std::string value);
+		std::vector<property_data> table();
 
+
+		void clear();
 
 	};
+
+
+	using pointer_property = std::shared_ptr<vl::property>;
 }
 
 

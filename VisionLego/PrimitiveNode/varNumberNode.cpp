@@ -16,16 +16,6 @@ vl::varNumberNode::varNumberNode(std::string name, vl::ihandle* engine) : vl::no
 		this->registerNode("flow", vl::to_integer(vl::objectType::VL_CONST_FLOW), vl::searchType::output);
 		this->registerNode("output", vl::to_integer(vl::objectType::VL_CONST_NUMBER), vl::searchType::output);
 
-
-		//parse preparation
-		this->property<double>("input", [&]() {
-			return this->input<vl::constNumberNode>("input")->get();
-		});
-
-		this->property<double>("input", [&](double value) {
-			this->input<vl::constNumberNode>("input")->set(value);
-		});
-
 	}
 	catch (std::exception e) {
 		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
@@ -74,7 +64,25 @@ void vl::varNumberNode::process() {
 	}
 }
 
+void vl::varNumberNode::onUpdatePrimitive() {
+	try {
+		vl::pointer_property prop(new vl::property());
 
-void vl::varNumberNode::primitive(vl::pointer_argument arg) {
+		prop->set("input", this->input<vl::constNumberNode>("input")->get());
 
+		this->primitive(prop);
+	}
+	catch (vl::exception e) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
+	}
+}
+void vl::varNumberNode::changePrimitive(vl::pointer_property prop) {
+	try {
+		this->input<vl::constNumberNode>("input")->set(prop->get<bool>("input", false));
+	}
+	catch (vl::exception e) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
+	}
 }

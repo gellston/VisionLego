@@ -22,15 +22,6 @@ vl::condIfNode::condIfNode(std::string name, vl::ihandle* engine) : vl::node(nam
 		this->registerCondition("else");
 
 
-		//parse preparation
-		this->property<bool>("check", [&]() {
-			return this->input<vl::constBoolNode>("check")->get();
-			});
-
-		this->property<bool>("check", [&](bool value) {
-			this->input<vl::constBoolNode>("check")->set(value);
-		});
-
 	}
 	catch (std::exception e) {
 		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
@@ -80,6 +71,28 @@ void vl::condIfNode::process() {
 	}
 }
 
-void vl::condIfNode::primitive(vl::pointer_argument arg) {
+void vl::condIfNode::onUpdatePrimitive() {
+	try {
+		vl::pointer_property prop(new vl::property());
 
+		prop->set("check", this->input<vl::constBoolNode>("check")->get());
+
+		this->primitive(prop);
+	}
+	catch (vl::exception e) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
+	}
+}
+
+void vl::condIfNode::changePrimitive(vl::pointer_property prop) {
+	try {
+
+		this->input<vl::constBoolNode>("check")->set(prop->get<bool>("check", false));
+		
+	}
+	catch (vl::exception e) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
+	}
 }

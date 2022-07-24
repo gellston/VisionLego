@@ -38,21 +38,23 @@ namespace vl {
 
 
 
-
-		std::unordered_map<std::string, std::function<void(double)>> _doubleSetCallback;
-		std::unordered_map<std::string, std::function<void(int)>> _intSetCallback;
-		std::unordered_map<std::string, std::function<void(std::string)>> _stringSetCallback;
-		std::unordered_map<std::string, std::function<void(bool)>> _boolSetCallback;
+		pointer_property _primitive_data;
 
 
-		std::unordered_map<std::string, std::function<double()>> _doubleRetCallback;
-		std::unordered_map<std::string, std::function<int()>> _intRetCallback;
-		std::unordered_map<std::string, std::function<std::string()>> _stringRetCallback;
-		std::unordered_map<std::string, std::function<bool()>> _boolRetCallback;
+		//std::unordered_map<std::string, std::function<void(double)>> _doubleSetCallback;
+		//std::unordered_map<std::string, std::function<void(int)>> _intSetCallback;
+		//std::unordered_map<std::string, std::function<void(std::string)>> _stringSetCallback;
+		//std::unordered_map<std::string, std::function<void(bool)>> _boolSetCallback;
+
+
+		//std::unordered_map<std::string, std::function<double()>> _doubleRetCallback;
+		//std::unordered_map<std::string, std::function<int()>> _intRetCallback;
+		//std::unordered_map<std::string, std::function<std::string()>> _stringRetCallback;
+		//std::unordered_map<std::string, std::function<bool()>> _boolRetCallback;
 
 
 
-		impl_node() {
+		impl_node() : _primitive_data(new vl::property()) {
 			_uid = 0;
 			_depth = 0;
 			_name = "";
@@ -61,6 +63,7 @@ namespace vl {
 			_message = "";
 			_engine = nullptr;
 			_inCondition = false;
+
 		}
 		~impl_node() {
 
@@ -98,37 +101,12 @@ vl::node::~node() {
 
 
 
-template<> void vl::node::property(std::string name, std::function<void(std::string)> callback) {
-	this->_instance->_stringSetCallback[name] = callback;
+void vl::node::primitive(vl::pointer_property prop) {
+	this->_instance->_primitive_data = prop;
 }
-template<> void vl::node::property(std::string name, std::function<void(double)> callback) {
-	this->_instance->_doubleSetCallback[name] = callback;
+vl::pointer_property vl::node::primitive() {
+	return this->_instance->_primitive_data;
 }
-template<> void vl::node::property(std::string name, std::function<void(int)> callback) {
-	this->_instance->_intSetCallback[name] = callback;
-}
-
-template<> void vl::node::property(std::string name, std::function<void(bool)> callback) {
-	this->_instance->_boolSetCallback[name] = callback;
-}
-
-
-
-
-
-template<> void vl::node::property(std::string name, std::function<double()> callback) {
-	this->_instance->_doubleRetCallback[name] = callback;
-}
-template<> void vl::node::property(std::string name, std::function<std::string()> callback) {
-	this->_instance->_stringRetCallback[name] = callback;
-}
-template<> void vl::node::property(std::string name, std::function<int()> callback) {
-	this->_instance->_intRetCallback[name] = callback;
-}
-template<> void vl::node::property(std::string name, std::function<bool()> callback) {
-	this->_instance->_boolRetCallback[name] = callback;
-}
-
 
 
 std::string vl::node::serialization() {
@@ -141,15 +119,9 @@ std::string vl::node::serialization() {
 		object["depth"] = this->depth();
 		object["type"] = this->type();
 		object["inCondition"] = this->inCondition();
-
-		object["double"] = {};
-		object["string"] = {};
-		object["int"] = {};
-		object["bool"] = {};
+		object["primitive"] = {};
 		object["connection"] = {};
 		object["condition"] = {};
-
-
 
 		// connection
 		for (auto& input : this->_instance->_inputNode) {
@@ -162,37 +134,17 @@ std::string vl::node::serialization() {
 				object["connection"].push_back({ key, uid, outputKey });
 			}
 		}
-		//double serialization
-		for (auto& keypair : this->_instance->_doubleRetCallback) {
-			std::string key = keypair.first;
-			auto callback = keypair.second;
-			object["double"].push_back({ key, callback() });
+
+		this->onUpdatePrimitive();
+		auto primitive_data = this->primitive()->table();
+		for (auto& data : primitive_data) {
+			std::string type = std::get<0>(data);
+			std::string key = std::get<1>(data);
+			std::string value = std::get<2>(data);
+			object["primitive"].push_back({ type, key, value });
+
 		}
-		//int serialization
-		for (auto& keypair : this->_instance->_intRetCallback) {
-			std::string key = keypair.first;
-			auto callback = keypair.second;
-			object["int"].push_back({ key, callback() });
-		}
-		//string serialization
-		for (auto& keypair : this->_instance->_stringRetCallback) {
-			std::string key = keypair.first;
-			auto callback = keypair.second;
-			object["string"].push_back({ key, callback() });
-		}
-		//bool serialization
-		for (auto& keypair : this->_instance->_boolRetCallback) {
-			std::string key = keypair.first;
-			auto callback = keypair.second;
-			object["bool"].push_back({ key, callback() });
-		}
-		//condition serialization
-		for (auto& keypair : this->_instance->_conditional_node_map) {
-			std::string key = keypair.first;
-			for (auto& uniqueKey : keypair.second) {
-				object["condition"].push_back({ key, uniqueKey });
-			}
-		}
+
 		return object.dump();
 	}
 	catch (std::exception e) {
@@ -210,14 +162,9 @@ std::string vl::node::beautify() {
 		object["depth"] = this->depth();
 		object["type"] = this->type();
 		object["inCondition"] = this->inCondition();
-
-		object["double"] = {};
-		object["string"] = {};
-		object["int"] = {};
-		object["bool"] = {};
+		object["primitive"] = {};
 		object["connection"] = {};
-
-
+		object["connection"] = {};
 
 		// connection
 		for (auto& input : this->_instance->_inputNode) {
@@ -229,37 +176,17 @@ std::string vl::node::beautify() {
 				object["connection"].push_back({ key, uid, outputKey });
 			}
 		}
-		//double serialization
-		for (auto& keypair : this->_instance->_doubleRetCallback) {
-			std::string key = keypair.first;
-			auto callback = keypair.second;
-			object["double"].push_back({ key, callback() });
+
+		this->onUpdatePrimitive();
+		auto primitive_data = this->primitive()->table();
+		for (auto& data : primitive_data) {
+			std::string type = std::get<0>(data);
+			std::string key = std::get<1>(data);
+			std::string value = std::get<2>(data);
+			object["primitive"].push_back({ type, key, value });
+
 		}
-		//int serialization
-		for (auto& keypair : this->_instance->_intRetCallback) {
-			std::string key = keypair.first;
-			auto callback = keypair.second;
-			object["int"].push_back({ key, callback() });
-		}
-		//string serialization
-		for (auto& keypair : this->_instance->_stringRetCallback) {
-			std::string key = keypair.first;
-			auto callback = keypair.second;
-			object["string"].push_back({ key, callback() });
-		}
-		//bool serialization
-		for (auto& keypair : this->_instance->_boolRetCallback) {
-			std::string key = keypair.first;
-			auto callback = keypair.second;
-			object["bool"].push_back({ key, callback() });
-		}
-		//condition serialization
-		for (auto& keypair : this->_instance->_conditional_node_map) {
-			std::string key = keypair.first;
-			for (auto& uniqueKey : keypair.second) {
-				object["condition"].push_back({ key, uniqueKey });
-			}
-		}
+
 		return object.dump(4);
 	}
 	catch (std::exception e) {
@@ -308,7 +235,6 @@ void vl::node::parse(std::string content) {
 		for (auto& keyPair : this->_instance->_conditional_node_map) {
 			keyPair.second.clear();
 		}
-
 		auto _connection = object["condition"];
 		if (_connection != nullptr) {
 			for (auto& element : _connection) {
@@ -321,79 +247,18 @@ void vl::node::parse(std::string content) {
 			}
 		}
 
-		auto _bool = object["bool"];
-		if (_bool != nullptr) {
-			for (auto& element : _bool) {
-				std::string name = element[0];
-				bool check = element[1];
-
-				for (auto& input : this->_instance->_inputNode) {
-					auto _targetName = input.first;
-					if (_targetName == name) {
-						auto node = std::get<1>(input.second);
-						vl::pointer_argument arg(new vl::argument());
-						arg->add("value", check);
-						node->primitive(arg);
-					}
-				}
+		auto primitive = object["primitive"];
+		if (primitive != nullptr) {
+			vl::pointer_property temp_property(new vl::property());
+			for (auto& element : primitive) {
+				std::string type = element[0];
+				std::string key = element[1];
+				std::string value = element[2];
+				temp_property->parse(type, key, value);
 			}
-		}
 
-
-		auto _double = object["double"];
-		if (_double != nullptr) {
-			for (auto& element : _double) {
-				std::string name = element[0];
-				double check = element[1];
-
-				for (auto& input : this->_instance->_inputNode) {
-					auto _targetName = input.first;
-					if (_targetName == name) {
-						auto node = std::get<1>(input.second);
-						vl::pointer_argument arg(new vl::argument());
-						arg->add("value", check);
-						node->primitive(arg);
-					}
-				}
-			}
-		}
-
-
-		auto _string = object["string"];
-		if (_string != nullptr) {
-			for (auto& element : _string) {
-				std::string name = element[0];
-				std::string check = element[1];
-
-				for (auto& input : this->_instance->_inputNode) {
-					auto _targetName = input.first;
-					if (_targetName == name) {
-						auto node = std::get<1>(input.second);
-						vl::pointer_argument arg(new vl::argument());
-						arg->add("value", check);
-						node->primitive(arg);
-					}
-				}
-			}
-		}
-
-
-		auto _int = object["int"];
-		if (_int != nullptr) {
-			for (auto& element : _int) {
-				std::string name = element[0];
-				int check = element[1];
-
-				for (auto& input : this->_instance->_inputNode) {
-					auto _targetName = input.first;
-					if (_targetName == name) {
-						auto node = std::get<1>(input.second);
-						vl::pointer_argument arg(new vl::argument());
-						arg->add("value", check);
-						node->primitive(arg);
-					}
-				}
-			}
+			this->primitive(temp_property);
+			this->changePrimitive(temp_property);
 		}
 
 	}

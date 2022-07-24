@@ -19,17 +19,6 @@ vl::varBoolNode::varBoolNode(std::string name, vl::ihandle* engine) : vl::node(n
 		this->registerNode("flow", vl::to_integer(vl::objectType::VL_CONST_FLOW), vl::searchType::output);
 		this->registerNode("output", vl::to_integer(vl::objectType::VL_CONST_BOOL), vl::searchType::output);
 
-
-
-		//parse preparation
-		this->property<bool>("input", [&](){
-			return this->input<vl::constBoolNode>("input")->get();
-		});
-
-		this->property<bool>("input", [&](bool value) {
-			this->input<vl::constBoolNode>("input")->set(value);
-		});
-
 	}
 	catch (std::exception e) {
 		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
@@ -89,6 +78,25 @@ void vl::varBoolNode::process() {
 }
 
 
-void vl::varBoolNode::primitive(vl::pointer_argument arg) {
+void vl::varBoolNode::onUpdatePrimitive() {
+	try {
+		vl::pointer_property prop(new vl::property());
 
+		prop->set("input", this->input<vl::constBoolNode>("input")->get());
+
+		this->primitive(prop);
+	}
+	catch (vl::exception e) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
+	}
+}
+void vl::varBoolNode::changePrimitive(vl::pointer_property prop) {
+	try {
+		this->input<vl::constBoolNode>("input")->set(prop->get<bool>("input", false));
+	}
+	catch (vl::exception e) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
+	}
 }

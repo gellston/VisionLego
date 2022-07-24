@@ -14,6 +14,7 @@
 #include "ihandle.h"
 #include "inode.h"
 #include "vlexception.h"
+#include "property.h"
 
 namespace vl {
 
@@ -54,24 +55,9 @@ namespace vl {
 		void registerCondition(std::string name);
 
 
-		template<typename T> void property(std::string name, std::function<void(T)> callback) {
-
-		}
-
-		template<typename T> void property(std::string name, std::function<T()> callback) {
-
-		}
-
-		template<> void property(std::string name, std::function<void(std::string)> callback);
-		template<> void property(std::string name, std::function<void(double)> callback);
-		template<> void property(std::string name, std::function<void(int)> callback);
-		template<> void property(std::string name, std::function<void(bool)> callback);
+		
 		
 
-		template<> void property(std::string name, std::function<double()> callback);
-		template<> void property(std::string name, std::function<std::string()> callback);
-		template<> void property(std::string name, std::function<int()> callback);
-		template<> void property(std::string name, std::function<bool()> callback);
 
 	public:
 
@@ -86,6 +72,11 @@ namespace vl {
 		bool inCondition() override;
 		void setInCondition(bool check) override;
 		void checkConnectivity() override;
+
+
+		void primitive(pointer_property prop);
+		pointer_property primitive();
+		
 
 
 		//Find const node

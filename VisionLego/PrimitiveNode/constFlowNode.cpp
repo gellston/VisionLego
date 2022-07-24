@@ -42,6 +42,9 @@ void vl::constFlowNode::process() {
 
 }
 
-void vl::constFlowNode::primitive(vl::pointer_argument arg) {
+void vl::constFlowNode::onUpdatePrimitive() {
+
+}
+void vl::constFlowNode::changePrimitive(vl::pointer_property prop) {
 
 }
