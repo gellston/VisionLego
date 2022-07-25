@@ -750,3 +750,72 @@ std::string vl::vscript::serialization() {
 	}
 	return content;
 }
+
+
+void vl::vscript::disconnect(unsigned long long inUidm) {
+
+	try {
+		auto node = this->findNode(inUidm);
+		auto outputUID = node->outputUid();
+
+		for (auto uid : outputUID) {
+			try {
+				auto targetNode = this->findNode(uid);
+				targetNode->disconnect(inUidm);
+			}
+			catch (vl::exception e) {
+
+			}
+		}
+
+	}
+	catch (vl::exception e) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
+	}
+
+}
+
+
+void vl::vscript::disconnect(pointer_inode inNode) {
+	try {
+		this->disconnect(inNode->uid());
+
+	}
+	catch (vl::exception e) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
+	}
+}
+
+
+void vl::vscript::removeNode(unsigned long long uid) {
+	try {
+
+		try {
+			this->disconnect(uid);
+		}
+		catch (vl::exception e) {
+
+		}
+
+		this->_instance->_nodes_table.erase(uid);
+		this->_engine->depthAlign();
+		this->_engine->depthSorting();
+	}
+	catch (vl::exception e) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
+	}
+}
+
+
+void vl::vscript::removeNode(pointer_inode node) {
+	try {
+		this->removeNode(node->uid());
+	}
+	catch (vl::exception e) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
+	}
+}

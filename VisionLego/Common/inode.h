@@ -57,6 +57,9 @@ namespace vl {
 		virtual void connect(std::string outkey, unsigned long long outUid, std::string inkey) = 0;
 		virtual void connect(std::shared_ptr<vl::inode> outNode, std::string outKey, std::string inkey) = 0;
 		virtual void disconnect(std::string inKey) = 0;
+		virtual void disconnect(unsigned long long uid) = 0;
+
+
 		virtual void addInCondition(std::string name, unsigned long long uid) = 0;
 		virtual void addInCondition(std::string name, std::shared_ptr<vl::inode> node) = 0;
 

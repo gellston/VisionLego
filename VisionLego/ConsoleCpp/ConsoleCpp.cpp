@@ -29,7 +29,7 @@ int main()
 
         auto node1 = script.addNode("test1", vl::to_integer(vl::objectType::VL_BOOL));
         auto node2 = script.addNode("test2", vl::to_integer(vl::objectType::VL_BOOL));
-        auto node3 = script.addNode("test3", vl::to_integer(vl::objectType::VL_BOOL));
+        auto node3 = script.addNode("test77777777777", vl::to_integer(vl::objectType::VL_BOOL));
         auto node4 = script.addNode("test4", vl::to_integer(vl::objectType::VL_BOOL));
 
 
@@ -88,37 +88,32 @@ int main()
 
 
         script.printNodeInfo();
+        script.removeNode(node3);
+
         script.setMaxTaskCount(4);
-
-
-        
-
-
-        script.save("C://Github//test//test.txt");
+        script.save("D://test.txt");
         script.load(script.serialization(), vl::contextType::json);
-        script.save("C://Github//test//test2.txt");
-
-
+        script.save("D://test2.txt");
 
         script.printNodeInfo();
 
 
-        std::chrono::steady_clock::time_point begin;
-        std::chrono::steady_clock::time_point end;
+        //std::chrono::steady_clock::time_point begin;
+        //std::chrono::steady_clock::time_point end;
 
-        begin = std::chrono::steady_clock::now();
-        script.run(vl::syncType::serial);
-        end = std::chrono::steady_clock::now();
-        auto elapseTime = std::chrono::duration_cast<std::chrono::seconds>(end - begin).count();
-        std::cout << "serial processing time = " << elapseTime << std::endl;
+        //begin = std::chrono::steady_clock::now();
+        //script.run(vl::syncType::serial);
+        //end = std::chrono::steady_clock::now();
+        //auto elapseTime = std::chrono::duration_cast<std::chrono::seconds>(end - begin).count();
+        //std::cout << "serial processing time = " << elapseTime << std::endl;
 
 
 
-        begin = std::chrono::steady_clock::now();
-        script.run(vl::syncType::parallel);
-        end = std::chrono::steady_clock::now();
-        elapseTime = std::chrono::duration_cast<std::chrono::seconds>(end - begin).count();
-        std::cout << "parallel processing time = " << elapseTime << std::endl;
+        //begin = std::chrono::steady_clock::now();
+        //script.run(vl::syncType::parallel);
+        //end = std::chrono::steady_clock::now();
+        //elapseTime = std::chrono::duration_cast<std::chrono::seconds>(end - begin).count();
+        //std::cout << "parallel processing time = " << elapseTime << std::endl;
 
 
        

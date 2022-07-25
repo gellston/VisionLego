@@ -27,6 +27,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AddonPrimitiveNode", "Addon
 		{5525FE10-538D-49F6-B5D0-71BBE7A22FF5} = {5525FE10-538D-49F6-B5D0-71BBE7A22FF5}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PInvokeVisionLego", "PInvokeVisionLego\PInvokeVisionLego.vcxproj", "{57D371AB-2384-4E22-8EE0-892E6D69A4DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -75,6 +77,14 @@ Global
 		{91336866-9C01-4D33-93D0-6FF94BE76264}.Release|x64.Build.0 = Release|x64
 		{91336866-9C01-4D33-93D0-6FF94BE76264}.Release|x86.ActiveCfg = Release|Win32
 		{91336866-9C01-4D33-93D0-6FF94BE76264}.Release|x86.Build.0 = Release|Win32
+		{57D371AB-2384-4E22-8EE0-892E6D69A4DF}.Debug|x64.ActiveCfg = Debug|x64
+		{57D371AB-2384-4E22-8EE0-892E6D69A4DF}.Debug|x64.Build.0 = Debug|x64
+		{57D371AB-2384-4E22-8EE0-892E6D69A4DF}.Debug|x86.ActiveCfg = Debug|Win32
+		{57D371AB-2384-4E22-8EE0-892E6D69A4DF}.Debug|x86.Build.0 = Debug|Win32
+		{57D371AB-2384-4E22-8EE0-892E6D69A4DF}.Release|x64.ActiveCfg = Release|x64
+		{57D371AB-2384-4E22-8EE0-892E6D69A4DF}.Release|x64.Build.0 = Release|x64
+		{57D371AB-2384-4E22-8EE0-892E6D69A4DF}.Release|x86.ActiveCfg = Release|Win32
+		{57D371AB-2384-4E22-8EE0-892E6D69A4DF}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

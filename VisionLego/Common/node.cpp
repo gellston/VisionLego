@@ -164,7 +164,7 @@ std::string vl::node::beautify() {
 		object["inCondition"] = this->inCondition();
 		object["primitive"] = {};
 		object["connection"] = {};
-		object["connection"] = {};
+		object["condition"] = {};
 
 		// connection
 		for (auto& input : this->_instance->_inputNode) {
@@ -655,6 +655,53 @@ void vl::node::disconnect(std::string inKey) {
 			auto isConst = std::get<2>(input.second);
 
 			
+			if (isConst == false) {
+				auto inputNode = this->_instance->_engine->find(uid);
+
+				auto objectDepth = inputNode->depth();
+				if (objectDepth > deepDepth)
+					deepDepth = objectDepth;
+			}
+		}
+		deepDepth += 1;
+		this->depth(deepDepth);
+	}
+	catch (vl::exception e) {
+		std::string message = vl::generate_error_message(__FUNCTION__, __LINE__, e.what());
+		throw vl::exception(message);
+	}
+
+	this->_instance->_engine->depthAlign();
+	this->_instance->_engine->depthSorting();
+}
+
+void vl::node::disconnect(unsigned long long uid) {
+
+
+	if (this->_instance->_engine == nullptr) {
+		std::string message = generate_error_message(__FUNCTION__, __LINE__, "Null engine exception");
+		throw vl::exception(message);
+	}
+
+	try {
+
+		for (auto& keypair : this->_instance->_inputNode) {
+			auto& inNode = keypair.second;
+			auto useConst = std::get<2>(inNode); //const use;
+			if (useConst == false && std::get<3>(inNode) == uid) {
+				std::get<3>(inNode) = vl::non_uid;	//clear uid
+				std::get<2>(inNode) = true;			//const use on
+				std::get<4>(inNode) = "";
+			}
+		}
+
+		unsigned int deepDepth = 0;
+		for (auto& input : this->_instance->_inputNode) {
+			auto key = input.first;
+			auto uid = std::get<3>(input.second);
+			auto isConst = std::get<2>(input.second);
+
+
 			if (isConst == false) {
 				auto inputNode = this->_instance->_engine->find(uid);
 

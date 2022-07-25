@@ -44,14 +44,19 @@ namespace vl {
 		*/
 		VL_SCRIPT_EXPORT vl::pointer_node addNode(std::string name, int objectType);
 		VL_SCRIPT_EXPORT vl::pointer_node addNode(std::string name, int objectType, unsigned long long uid);
+		VL_SCRIPT_EXPORT void removeNode(unsigned long long uid);
+		VL_SCRIPT_EXPORT void removeNode(pointer_inode node);
 		VL_SCRIPT_EXPORT pointer_inode findNode(unsigned long long uid);
 		VL_SCRIPT_EXPORT void clearNode();
 		VL_SCRIPT_EXPORT void disconnect(pointer_inode inNode, std::string inKey);
 		VL_SCRIPT_EXPORT void disconnect(unsigned long long inUid, std::string inKey);
+		VL_SCRIPT_EXPORT void disconnect(unsigned long long outUid);
+		VL_SCRIPT_EXPORT void disconnect(pointer_inode inNode);
 		VL_SCRIPT_EXPORT void connect(pointer_inode outNode, std::string outKey, pointer_inode inNode, std::string inKey);
 		VL_SCRIPT_EXPORT void connect(unsigned long long outUid, std::string outKey, unsigned long long inUid, std::string inKey);
 		VL_SCRIPT_EXPORT void printNodeInfo();
 		VL_SCRIPT_EXPORT std::string serialization();
+
 	};
 
 	using pointer_vscript = std::shared_ptr<vscript>;
